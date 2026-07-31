@@ -1,7 +1,8 @@
 # 🤖 GenAI Basics & Agentic AI: Web vs. API, Statelessness Proven Live & the Anatomy of an Agent
 
-> **Session:** Day 5 — Class 4: "GenAI Basics & Agentic AI" · **Instructor:** Mayank Aggarwal
-> **Note on scope:** This is a **deliberately code-free, concept-first session** — the instructor explicitly defers all raw Python agent-building code to "the next weekend class." Instead, this session uses **live demonstrations on real platforms** (ChatGPT web, Claude web, the OpenAI API platform, OpenRouter, and an n8n visual workflow used purely as a teaching aid) to build rock-solid intuition for: the web-vs-API distinction, why LLM calls are stateless, how context windows behave under real, escalating token pressure, and — the session's centerpiece — the full "Anatomy of an Agent" (brain + memory + tools) demonstrated end-to-end without writing a single line of code. This guide reflects that scope faithfully rather than inventing code that wasn't taught here.
+- **Session:** Day 5 — Class 4: "GenAI Basics & Agentic AI" ·
+- **Instructor:** Mayank Aggarwal
+- **Note on scope:** This is a **deliberately code-free, concept-first session** — the instructor explicitly defers all raw Python agent-building code to "the next weekend class." Instead, this session uses **live demonstrations on real platforms** (ChatGPT web, Claude web, the OpenAI API platform, OpenRouter, and an n8n visual workflow used purely as a teaching aid) to build rock-solid intuition for: the web-vs-API distinction, why LLM calls are stateless, how context windows behave under real, escalating token pressure, and — the session's centerpiece — the full "Anatomy of an Agent" (brain + memory + tools) demonstrated end-to-end without writing a single line of code. This guide reflects that scope faithfully rather than inventing code that wasn't taught here.
 
 ---
 
