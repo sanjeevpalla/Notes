@@ -1,6 +1,6 @@
 # 🤖 Building AI Agents from First Principles: The Agentic Loop, Tool Calling & Structured Output
 
-- <i>**Session:** Day 6 — "LangChain‑1" (Pre‑Framework Foundations) · 
+- <i>**Session:** Day 6 — "The Agentic Loop" (Pre‑Framework Foundations) · 
 - **Instructor:** Mayank
 - **Note on scope:** Despite the session title, the class deliberately does **not** touch the LangChain library. The instructor's stated goal is to make sure every learner can build an AI agent using *only* raw Python and a raw LLM API call — no framework "magic" — so that LangChain (covered in the next session) is understood rather than memorized. This guide reflects that scope and teaches the underlying mechanics in depth.</i>
 
