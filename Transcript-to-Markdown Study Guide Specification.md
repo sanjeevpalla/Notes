@@ -870,5 +870,7 @@ This contextual approach should be followed **throughout the entire document**.
 
 The final Markdown should feel like a **professionally designed technical textbook + practical developer handbook + interview preparation guide**, rather than a transcript summary.
 
+---
+
 # Important Note 
 When generating markdown files with a Table of Contents, verify all anchor links resolve correctly against the actual headers before delivering the file. Avoid emoji with hidden variation-selector characters (e.g. 🛠️, 🏗️) in linked headings — use plain single-codepoint emoji instead.
