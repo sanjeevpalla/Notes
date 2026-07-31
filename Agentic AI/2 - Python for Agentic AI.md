@@ -1,7 +1,6 @@
 # 🐍 Python for Agentic AI — Development Environment, Fundamentals & the API Mental Model
 
-> **Session:** Day 2 — Class 1: "Python AI"·   
- **Instructor:** Mayank Aggarwal  
+> **Session:** Day 2 — Class 1: "Python AI" · **Instructor:** Mayank Aggarwal
 > **Note on scope:** This class is the **first substantive technical session** of the batch. Roughly the first half is a deep, deliberate dive into the **professional Python development environment** (terminal, Python installation, UV, virtual environments, project structure) — treated as a first-class topic, not throat-clearing, because the instructor's stated philosophy is that broken environments cause more real-world pain than any framework concept. The second half moves into **core Python fundamentals** (variables, f-strings, conditionals, functions, docstrings) and the **API mental model**, demonstrated with a live public currency-conversion API call. OOP (classes/objects) is introduced as a named prerequisite topic but explicitly deferred to a later class — this guide reflects that honestly rather than inventing content that wasn't taught.
 
 ---
@@ -25,7 +24,7 @@
 5. [Revision Notes — One-Minute Revision](#-revision-notes--one-minute-revision)
 6. [Cheat Sheet](#-cheat-sheet)
 7. [Interview Questions & Answers](#-interview-questions--answers)
-8. [Scenario-Based Questions](#-scenario-based-questions)
+8. [Scenario-Based Interview Questions](#-scenario-based-interview-questions)
 9. [Hands-on Exercises](#-hands-on-exercises)
 10. [Practice Assignment](#-practice-assignment)
 11. [Additional Resources](#-additional-resources)
@@ -861,7 +860,7 @@ data = response.json()
 
 ---
 
-## 🛠️ Hands-on Exercises
+## 🛠 Hands-on Exercises
 
 ### 🟢 Easy
 
@@ -883,7 +882,7 @@ data = response.json()
 
 ---
 
-## 🏗️ Practice Assignment
+## 🏗 Practice Assignment
 
 ### Build: "Environment & API Sanity-Check Toolkit"
 

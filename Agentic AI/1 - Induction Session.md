@@ -1,7 +1,6 @@
 # 🎓 Agentic AI 3.0 with AgentOps — Induction Session Study Guide
 
-> **Session:** Day 1 — Induction Session ·   
-**Speakers:** Krish Naik (Founder, Krishnaik Academy) & Mayank Aggarwal (Mentor)  
+> **Session:** Day 1 — Induction Session · **Speakers:** Krish Naik (Founder, Krishnaik Academy) & Mayank Aggarwal (Mentor)
 > **Note on scope:** This session is a **course orientation, not a technical lecture**. There is no code, no API call, and no framework walkthrough — the goal is to align expectations: what the batch covers, how it runs, what's required before class, and how to build a career around it. This guide treats it accordingly: it captures the curriculum roadmap, learning methodology, platform mechanics, and career strategy as *teachable content in their own right*, since understanding "how to learn this domain and operate inside this program" is itself the actionable takeaway of Day 1.
 
 ---
@@ -738,7 +737,7 @@ Foundations → Core Frameworks & Protocols → Sequenced Projects
 
 ---
 
-## 🛠️ Hands-on Exercises
+## 🛠 Hands-on Exercises
 
 ### 🟢 Easy
 
@@ -760,7 +759,7 @@ Foundations → Core Frameworks & Protocols → Sequenced Projects
 
 ---
 
-## 🏗️ Practice Assignment
+## 🏗 Practice Assignment
 
 ### Build: "My Agentic AI 3.0 Readiness Plan"
 
