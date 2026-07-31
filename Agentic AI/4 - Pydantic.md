@@ -1,7 +1,8 @@
 # 🧩 Mastering Pydantic + AI Foundations: Type Safety, Data Validation & the Building Blocks of LLMs
 
-> **Session:** Day 4 — Class 3: "Pydantic" · **Instructor:** Mayank Aggarwal
-> **Note on scope:** This class has two distinct halves. The **first half** goes deep into Pydantic — well beyond the type-validation basics introduced in the previous class — covering field constraints, Pydantic's built-in special types, custom `field_validator`s, cross-field `model_validator`s, computed fields, and nested models. The **second half** is a deliberate, no-code, whiteboard-style walkthrough of the core AI vocabulary every learner needs before agent-building begins: **LLMs, tokens, vector embeddings, context window, and parameters**. Real API calls and the first actual agent are explicitly deferred to the next class — this session builds the conceptual and data-validation foundation first.
+- <i>**Session:** Day 4 — Class 3: "Pydantic" ·
+- **Instructor:** Mayank Aggarwal
+- **Note on scope:** This class has two distinct halves. The **first half** goes deep into Pydantic — well beyond the type-validation basics introduced in the previous class — covering field constraints, Pydantic's built-in special types, custom `field_validator`s, cross-field `model_validator`s, computed fields, and nested models. The **second half** is a deliberate, no-code, whiteboard-style walkthrough of the core AI vocabulary every learner needs before agent-building begins: **LLMs, tokens, vector embeddings, context window, and parameters**. Real API calls and the first actual agent are explicitly deferred to the next class — this session builds the conceptual and data-validation foundation first.</i>
 
 ---
 

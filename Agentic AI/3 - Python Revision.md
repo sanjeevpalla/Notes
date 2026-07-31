@@ -1,7 +1,8 @@
 # 🐍 Python Revision for Agentic AI — OOP, Decorators, Error Handling & Pydantic
 
-> **Session:** Day 3 — Class 2: "Python Revision" · **Instructor:** Mayank Aggarwal
-> **Note on scope:** This class opens with a live, from-scratch **Windows environment setup** (installing Git Bash, VS Code, and UV on a completely fresh Windows installation, run as a container on the instructor's Mac — used deliberately to also teach the concept of containerization/environments). It then moves into a fast-paced **Python fundamentals revision**: variables/types, f-strings, lists vs. arrays, JSON-as-dictionary, **OOP** (classes, objects, `self`, constructors), **dataclasses**, **error handling** (`try`/`except`/`finally`), **decorators**, a hand-built simulation of how an AI API call is structured (roles/messages), and finally an introduction to **Pydantic** as the solution to Python's lack of type safety. This is explicitly framed as prerequisite revision — real AI/agent-building code begins in the next class.
+- <i>**Session:** Day 3 — Class 2: "Python Revision" ·
+- **Instructor:** Mayank Aggarwal
+- **Note on scope:** This class opens with a live, from-scratch **Windows environment setup** (installing Git Bash, VS Code, and UV on a completely fresh Windows installation, run as a container on the instructor's Mac — used deliberately to also teach the concept of containerization/environments). It then moves into a fast-paced **Python fundamentals revision**: variables/types, f-strings, lists vs. arrays, JSON-as-dictionary, **OOP** (classes, objects, `self`, constructors), **dataclasses**, **error handling** (`try`/`except`/`finally`), **decorators**, a hand-built simulation of how an AI API call is structured (roles/messages), and finally an introduction to **Pydantic** as the solution to Python's lack of type safety. This is explicitly framed as prerequisite revision — real AI/agent-building code begins in the next class.</i>
 
 ---
 

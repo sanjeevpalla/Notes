@@ -1,7 +1,8 @@
 # 🐍 Python for Agentic AI — Development Environment, Fundamentals & the API Mental Model
 
-> **Session:** Day 2 — Class 1: "Python AI" · **Instructor:** Mayank Aggarwal
-> **Note on scope:** This class is the **first substantive technical session** of the batch. Roughly the first half is a deep, deliberate dive into the **professional Python development environment** (terminal, Python installation, UV, virtual environments, project structure) — treated as a first-class topic, not throat-clearing, because the instructor's stated philosophy is that broken environments cause more real-world pain than any framework concept. The second half moves into **core Python fundamentals** (variables, f-strings, conditionals, functions, docstrings) and the **API mental model**, demonstrated with a live public currency-conversion API call. OOP (classes/objects) is introduced as a named prerequisite topic but explicitly deferred to a later class — this guide reflects that honestly rather than inventing content that wasn't taught.
+- <i>**Session:** Day 2 — Class 1: "Python AI" ·
+- **Instructor:** Mayank Aggarwal
+- **Note on scope:** This class is the **first substantive technical session** of the batch. Roughly the first half is a deep, deliberate dive into the **professional Python development environment** (terminal, Python installation, UV, virtual environments, project structure) — treated as a first-class topic, not throat-clearing, because the instructor's stated philosophy is that broken environments cause more real-world pain than any framework concept. The second half moves into **core Python fundamentals** (variables, f-strings, conditionals, functions, docstrings) and the **API mental model**, demonstrated with a live public currency-conversion API call. OOP (classes/objects) is introduced as a named prerequisite topic but explicitly deferred to a later class — this guide reflects that honestly rather than inventing content that wasn't taught.</i>
 
 ---
 
