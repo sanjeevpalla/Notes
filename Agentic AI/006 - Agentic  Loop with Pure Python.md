@@ -139,6 +139,14 @@ Ask "Who won the FIFA match yesterday?" to a plain chatbot: it will honestly say
 
 ### 2. Anatomy of an LLM Call: Messages, Roles & Statelessness
 
+```mermaid
+flowchart TD
+    A["Call 1: [system, user]"] --> B["Model replies —<br/>reply appended as 'assistant'"]
+    B --> C["Call 2: [system, user, assistant, NEW user]<br/>the ENTIRE list resent"]
+    C --> D["Model replies again"]
+    D --> E["Call 3: even longer list resent —<br/>the model itself remembers NOTHING<br/>between calls"]
+```
+
 #### 📖 Definition
 
 Every call to a chat-based LLM API sends a list of **messages**, each tagged with a **role**: `system`, `user`, or `assistant`. This list — not some hidden server-side session — *is* the model's entire understanding of the conversation.
@@ -355,6 +363,12 @@ flowchart LR
 
 ### 5. Giving Your AI Tools: The Tool Schema
 
+```mermaid
+flowchart TD
+    A["Naive approach:<br/>if 'weather' in question.lower(): call_weather()"] --> B["❌ Brittle, doesn't scale,<br/>duplicates the LLM's own intelligence"]
+    C["Tool schema approach:<br/>describe tools with name/description/parameters"] --> D["✅ Model reads the 'menu'<br/>and routes intelligently on its own"]
+```
+
 #### 🧠 Concept
 
 To let the model *choose* actions instead of you hard-coding "if the question contains the word 'weather', call the weather function," you describe your tools to the model in a standardized **tool schema** — a JSON structure the AI reads at call time.
@@ -431,6 +445,15 @@ This mirrors why ChatGPT's built-in "web search" tool has a rich description tel
 
 #### ⚙ How It Works
 
+```mermaid
+flowchart TD
+    A["Send question + tool schemas"] --> B{"message.content or message.tool_calls?"}
+    B -->|"content"| C["Plain text answer —<br/>no tool needed"]
+    B -->|"tool_calls"| D["Model REQUESTS a specific<br/>function + arguments"]
+    D --> E["❌ Model does NOT execute anything"]
+    E --> F["✅ YOUR code parses the request<br/>and actually calls the function"]
+```
+
 When you send tool schemas alongside a question, the model's response contains either:
 - Plain text (`message.content`) — the model answered directly, no tool needed, **or**
 - A `tool_calls` list — the model is asking *you* to run a specific function with specific arguments, and is explicitly **not** giving you a final answer yet.
@@ -496,6 +519,15 @@ This is literally how Claude/ChatGPT's web search works: ask "who won the FIFA m
 ---
 
 ### 7. Multiple Tools & Avoiding Hallucinated Tool Calls
+
+```mermaid
+flowchart TD
+    A["'What is the capital of Japan?'"] --> B["Model reads ALL schemas:<br/>get_weather, calculator, get_capital"]
+    B --> C{"Which description<br/>best matches intent?"}
+    C --> D["✅ get_capital selected correctly"]
+    E["Vague/overlapping descriptions<br/>(e.g. get_weather vs get_weather_usa)"] --> F["❌ Model gets confused too —<br/>same as a human would"]
+    F --> G["Fix: clear, non-overlapping<br/>descriptions + explicit routing rules"]
+```
 
 #### ⚙ How It Works
 
@@ -712,6 +744,15 @@ def get_tool_schema_for_llm(tool_name: str) -> dict:
 
 ### 10. Security, Privacy & Architectural Judgment
 
+```mermaid
+flowchart TD
+    A["Tool executes,<br/>returns proprietary/sensitive data"] --> B["Result fed back into the loop<br/>for the next model call"]
+    B --> C["That data is now part of the payload<br/>sent to whichever provider hosts the brain"]
+    C --> D{"Third-party hosted model?"}
+    D -->|Yes| E["⚠ Sensitive data leaves your infrastructure"]
+    D -->|"No — self-hosted/private cloud"| F["✅ Data never leaves your boundary"]
+```
+
 #### 🏢 Real-World / Production Usage
 
 A recurring, important Q&A thread: whenever your tool's output (which may contain **proprietary/sensitive organizational data**) is fed back into the model for the next loop iteration, that data effectively becomes part of the payload sent to whichever provider is hosting the "brain."
@@ -767,7 +808,18 @@ A recurring, important Q&A thread: whenever your tool's output (which may contai
 
 ## 🔄 Revision Notes — One-Minute Revision
 
-> An **AI model** is a stateless brain: ask, answer, forget. A **chatbot** adds memory by re-sending the whole conversation (system, user, assistant messages) on every call. An **agent** adds **tools**: you describe each tool with a JSON schema (name, description, parameters), and the model — never your code alone — decides *if* and *which* tool is needed, returning `tool_calls` instead of plain text. **The model never executes anything; your code always does.** Free-text output is unreliable for programs, so you instruct the model to reply in strict JSON and parse it into a `pydantic.BaseModel` — remembering the reply is always a *string*, even when it looks like JSON. Chaining "call model → run requested tool → feed result back → call model again" in a loop, with a max-iteration safety cap, **is** the Agentic Loop — the true definition of an agent. At scale, sending every tool's full schema on every call gets expensive and error-prone (tool bloat/hallucination), so production systems lazy-load full schemas only for the tool actually selected, use sub-agents to group large tool sets, and add human-in-the-loop checks for sensitive actions.
+* An **AI model** is a stateless brain: ask, answer, forget.
+* A **chatbot** adds memory by re-sending the whole conversation (system, user, assistant messages) on every call.
+* An **agent** adds **tools**:
+  * You describe each tool with a JSON schema (name, description, parameters).
+  * The model — never your code alone — decides *if* and *which* tool is needed, returning `tool_calls` instead of plain text.
+  * **The model never executes anything; your code always does.**
+* Free-text output is unreliable for programs, so you instruct the model to reply in strict JSON and parse it into a `pydantic.BaseModel` — remembering the reply is always a *string*, even when it looks like JSON.
+* Chaining "call model → run requested tool → feed result back → call model again" in a loop, with a max-iteration safety cap, **is** the Agentic Loop — the true definition of an agent.
+* At scale, sending every tool's full schema on every call gets expensive and error-prone (tool bloat/hallucination), so production systems:
+  * Lazy-load full schemas only for the tool actually selected.
+  * Use sub-agents to group large tool sets.
+  * Add human-in-the-loop checks for sensitive actions.
 
 ---
 
@@ -837,192 +889,372 @@ else:
 
 ### 🟢 Beginner
 
-**Q1. What is the fundamental difference between an AI model, a chatbot, and an agent?**
+**Q1.**
+
+**Question:** What is the fundamental difference between an AI model, a chatbot, and an agent?
+
 **Answer:** An AI model is a stateless, single-shot predictor with no memory. A chatbot wraps that model with client-maintained conversation history so it can hold multi-turn conversations. An agent further wraps the chatbot with tools, letting the model request real-world actions.
+
 **Explanation:** Each layer builds on the last; only the "wrapping logic" changes, not the underlying LLM.
+
 **Why Interviewers Ask This:** It tests whether a candidate understands agent architecture conceptually, not just as a framework buzzword.
+
 **Possible Follow-up:** "Where does 'memory' actually live in this architecture?"
 
-**Q2. Why are LLMs described as 'stateless'?**
+**Q2.**
+
+**Question:** Why are LLMs described as 'stateless'?
+
 **Answer:** Because each API call is independent — the model retains no information about prior calls unless the full conversation history is explicitly resent as part of the request.
+
 **Explanation:** This is a design property of how inference works, not a bug.
+
 **Why Interviewers Ask This:** Tests basic understanding of how "memory" is simulated, not native.
+
 **Possible Follow-up:** "How would you reduce the token cost of resending a long history?"
 
-**Q3. What are the three standard message roles used in an LLM chat API?**
+**Q3.**
+
+**Question:** What are the three standard message roles used in an LLM chat API?
+
 **Answer:** `system`, `user`, and `assistant`.
+
 **Explanation:** `system` sets behavior/persona, `user` is human input, `assistant` is the model's past responses — all resent every call.
+
 **Why Interviewers Ask This:** Baseline knowledge required for any hands-on LLM API work.
+
 **Possible Follow-up:** "Is the system message mandatory?"
 
-**Q4. Is the system message sent only once, or with every API call?**
+**Q4.**
+
+**Question:** Is the system message sent only once, or with every API call?
+
 **Answer:** With every single call — there is no persistent server-side memory of it.
+
 **Explanation:** Because the model is stateless, the full context (including the system message) must accompany every request.
+
 **Why Interviewers Ask This:** A very common misconception among beginners.
+
 **Possible Follow-up:** "What's the cost implication of this?"
 
-**Q5. What does `max_tokens` control?**
+**Q5.**
+
+**Question:** What does `max_tokens` control?
+
 **Answer:** It caps the length of the model's generated output for that call, acting primarily as a cost/safety guardrail.
+
 **Explanation:** Without it, a malicious or careless request could generate extremely long (and expensive) output.
+
 **Why Interviewers Ask This:** Tests operational/production awareness, not just API syntax.
+
 **Possible Follow-up:** "What happens if a user's request genuinely needs more tokens than the cap allows?"
 
-**Q6. What does it mean that Groq's API is "OpenAI-compatible"?**
+**Q6.**
+
+**Question:** What does it mean that Groq's API is "OpenAI-compatible"?
+
 **Answer:** It accepts the same request/response shape as OpenAI's API, so you can reuse the same `openai` Python SDK — only the `api_key` and `base_url` need to change.
+
 **Explanation:** This lowers the switching cost between providers dramatically.
+
 **Why Interviewers Ask This:** Tests understanding of provider abstraction in real systems.
+
 **Possible Follow-up:** "Can you use an OpenAI key with Groq's base_url?"
 
-**Q7. Why can't you just use ChatGPT.com directly inside your company's product?**
+**Q7.**
+
+**Question:** Why can't you just use ChatGPT.com directly inside your company's product?
+
 **Answer:** ChatGPT.com is a consumer application, not an API; to embed LLM capability into your own product, you must call the underlying model via its API (e.g., OpenAI's API), which gives you only the raw LLM — not ChatGPT's UI features (web search, file upload, etc.) unless you build/wire them yourself.
+
 **Explanation:** Distinguishes "the model" from "the product built around the model."
+
 **Why Interviewers Ask This:** Common early confusion for engineers new to LLM app development.
+
 **Possible Follow-up:** "How would you replicate ChatGPT's web search feature in your own app?"
 
-**Q8. What Python library was used in this session to enforce structured output, and why?**
+**Q8.**
+
+**Question:** What Python library was used in this session to enforce structured output, and why?
+
 **Answer:** `pydantic` — because it provides typed, validated, self-documenting schemas that both constrain the AI's expected reply shape and make the parsed result safe to use in code.
+
 **Explanation:** Prevents fragile manual string-parsing of free-text LLM output.
+
 **Why Interviewers Ask This:** Tests familiarity with real, industry-standard tooling.
+
 **Possible Follow-up:** "What happens if the model's reply doesn't match the schema?"
 
-**Q9. True or False: An LLM's structured JSON reply is returned as an actual JSON object by the API.**
+**Q9.**
+
+**Question:** True or False: An LLM's structured JSON reply is returned as an actual JSON object by the API.
+
 **Answer:** False — it is always returned as a **string**, even if that string contains valid JSON syntax; you must parse it yourself.
+
 **Explanation:** A widely misunderstood but critical detail for building reliable pipelines.
+
 **Why Interviewers Ask This:** Tests attention to a subtle-but-important implementation detail.
+
 **Possible Follow-up:** "What issues can arise when parsing this string, and how do you handle them?"
 
-**Q10. What are the four essential fields of a tool/function schema?**
+**Q10.**
+
+**Question:** What are the four essential fields of a tool/function schema?
+
 **Answer:** `type` (usually `"function"`), `name`, `description`, and `parameters` (including `properties` and `required`).
+
 **Explanation:** This is the standard shape popularized by OpenAI's function-calling format and reused by most frameworks.
+
 **Why Interviewers Ask This:** Core, testable knowledge for anyone claiming tool-calling experience.
+
 **Possible Follow-up:** "Which field most influences whether the correct tool gets selected?"
 
 ---
 
 ### 🟡 Intermediate
 
-**Q11. Does the LLM ever execute a tool itself? Explain precisely what happens instead.**
+**Q11.**
+
+**Question:** Does the LLM ever execute a tool itself? Explain precisely what happens instead.
+
 **Answer:** No. The model only returns a `tool_calls` entry indicating which tool it wants invoked and with what arguments; your application code is solely responsible for actually executing that function.
+
 **Explanation:** This is the single most repeated, most tested concept in tool-calling interviews.
+
 **Why Interviewers Ask This:** Distinguishes candidates who've only read framework docs from those who understand the underlying mechanics.
+
 **Possible Follow-up:** "What would happen if your code ignored a tool_calls request and just returned message.content (which may be null)?"
 
-**Q12. What is the Agentic Loop, and why is a loop necessary instead of a single request/response?**
+**Q12.**
+
+**Question:** What is the Agentic Loop, and why is a loop necessary instead of a single request/response?
+
 **Answer:** It's the repeated cycle of calling the model, checking for `tool_calls`, executing any requested tools, appending the results back into the message history, and calling the model again — repeated until the model returns a plain-text answer. A single call can only get you the *tool selection*, not a final natural-language answer incorporating the tool's result — hence the need to loop back.
+
 **Explanation:** This defines what "an agent" fundamentally *is*, independent of any framework.
+
 **Why Interviewers Ask This:** Core architectural concept for any agentic-systems role.
+
 **Possible Follow-up:** "How do you prevent infinite loops?"
 
-**Q13. Why would you cap the number of loop iterations in an agentic loop (`max_iterations`)?**
+**Q13.**
+
+**Question:** Why would you cap the number of loop iterations in an agentic loop (`max_iterations`)?
+
 **Answer:** To prevent runaway cost/latency if the model keeps requesting tool calls indefinitely (due to ambiguous tools, bugs, or model confusion), and to guarantee the system eventually returns *some* response to the user.
+
 **Explanation:** A production safety guardrail, analogous to `max_tokens` for output length.
+
 **Why Interviewers Ask This:** Tests production-readiness thinking, not just happy-path implementation.
+
 **Possible Follow-up:** "What should your system do when the cap is hit?"
 
-**Q14. What causes an LLM to select the wrong tool among several similar ones, and how do you fix it?**
+**Q14.**
+
+**Question:** What causes an LLM to select the wrong tool among several similar ones, and how do you fix it?
+
 **Answer:** Ambiguous or overlapping tool `description`s, too many competing tools in context, or an insufficiently capable model. Fix by writing mutually exclusive, explicit descriptions (scoping when each tool should/shouldn't be used), reducing tool count via lazy loading, and/or using a stronger model.
+
 **Explanation:** Tool-selection hallucination is a description-engineering problem more than a "the AI is broken" problem.
+
 **Why Interviewers Ask This:** Tests practical debugging skill for agent systems.
+
 **Possible Follow-up:** "How would you test/validate tool-selection accuracy before shipping?"
 
-**Q15. What is "tool bloat," and how do you mitigate it in a system with 100+ tools?**
+**Q15.**
+
+**Question:** What is "tool bloat," and how do you mitigate it in a system with 100+ tools?
+
 **Answer:** Tool bloat is the token/cost/accuracy degradation caused by sending every tool's full schema on every request. Mitigate via lazy-loading (send only name+description up front, fetch full schema for the selected tool via a meta-tool), grouping tools into sub-agents, and pruning genuinely unused tools.
+
 **Explanation:** A key production-scaling concern raised repeatedly in the Q&A by learners with real-world use cases (e.g., 200-tool MIS reporting agents).
+
 **Why Interviewers Ask This:** Distinguishes toy-project experience from production-scale thinking.
+
 **Possible Follow-up:** "What's the trade-off of lazy-loading tool schemas?"
 
-**Q16. Explain what happens, step by step, when a tool's `arguments` field is parsed.**
+**Q16.**
+
+**Question:** Explain what happens, step by step, when a tool's `arguments` field is parsed.
+
 **Answer:** `function.arguments` in the API response is a JSON-formatted **string**; your code must `json.loads()` it to get a Python dict of keyword arguments, which you then unpack (`**kwargs`) into the actual tool function call.
+
 **Explanation:** A concrete implementation detail candidates must know to actually build a working agent.
+
 **Why Interviewers Ask This:** Tests hands-on implementation familiarity, not just conceptual understanding.
+
 **Possible Follow-up:** "What if `arguments` is malformed JSON — how would you handle that safely?"
 
-**Q17. Why is a `required` array important in a tool's parameter schema?**
+**Q17.**
+
+**Question:** Why is a `required` array important in a tool's parameter schema?
+
 **Answer:** It tells the model which arguments are mandatory. Omitting it can lead the model to issue a tool call missing critical arguments, causing a runtime error (e.g., `missing 1 required positional argument`) when your code tries to execute the function.
+
 **Explanation:** A schema-design detail with direct, testable runtime consequences.
+
 **Why Interviewers Ask This:** Tests whether the candidate has actually debugged real tool-calling errors.
+
 **Possible Follow-up:** "How would you handle a tool call that's missing a required argument gracefully instead of crashing?"
 
-**Q18. Compare "manual tool routing" (e.g., keyword matching on the question) with "AI-driven tool selection." What are the trade-offs?**
+**Q18.**
+
+**Question:** Compare "manual tool routing" (e.g., keyword matching on the question) with "AI-driven tool selection." What are the trade-offs?
+
 **Answer:** Manual routing (e.g., `if "weather" in question`) is simple, deterministic, and cheap, but brittle and doesn't scale past a handful of tools/phrasing variations. AI-driven selection (via tool schemas) scales to many tools and understands natural-language intent flexibly, but is probabilistic, can hallucinate, and adds token cost per call.
+
 **Explanation:** Reflects the exact architectural progression shown across the session's demo files.
+
 **Why Interviewers Ask This:** Tests judgment about when simpler approaches are actually preferable.
+
 **Possible Follow-up:** "When would you choose manual routing over AI-driven selection in production?"
 
-**Q19. What is a sub-agent / "agent as a tool" pattern, and why would you use it?**
+**Q19.**
+
+**Question:** What is a sub-agent / "agent as a tool" pattern, and why would you use it?
+
 **Answer:** Instead of flattening a huge number of tools into a single agent's tool list, you group related tools under a specialized sub-agent, and expose that entire sub-agent as a single callable "tool" (with its own description) to a parent/orchestrator agent. This keeps each individual agent's tool list small and manageable while still supporting large overall tool surfaces.
+
 **Explanation:** A key production pattern for scaling beyond what a flat tool list can handle cleanly.
+
 **Why Interviewers Ask This:** Tests awareness of multi-agent architecture patterns.
+
 **Possible Follow-up:** "How does this affect latency compared to a single flat agent?"
 
-**Q20. Why might an organization choose to self-host an open-source model instead of calling OpenAI/Anthropic's hosted API?**
+**Q20.**
+
+**Question:** Why might an organization choose to self-host an open-source model instead of calling OpenAI/Anthropic's hosted API?
+
 **Answer:** Primarily data privacy/security — tool outputs and proprietary organizational data get fed back into the model on every loop iteration, and with a third-party hosted API, that data leaves the organization's boundary. Self-hosting (or private cloud deployment) keeps that data internal.
+
 **Explanation:** A recurring, realistic enterprise concern raised directly in the Q&A.
+
 **Why Interviewers Ask This:** Tests awareness of real deployment/compliance trade-offs beyond pure ML knowledge.
+
 **Possible Follow-up:** "What are the downsides of self-hosting compared to a hosted API?"
 
 ---
 
 ### 🔴 Advanced
 
-**Q21. Design an agentic loop that must call two dependent tools sequentially (tool B needs tool A's output as an argument). How does the model orchestrate this, and how does your code differ from the single-tool case?**
+**Q21.**
+
+**Question:** Design an agentic loop that must call two dependent tools sequentially (tool B needs tool A's output as an argument). How does the model orchestrate this, and how does your code differ from the single-tool case?
+
 **Answer:** The model does **not** orchestrate multi-step sequencing on its own in a single response; it typically requests tool A first, your code executes it and appends the result, and the model — seeing that result on the *next* loop iteration — then requests tool B using A's result as an argument. Your code structure doesn't fundamentally change; it's the *same* agentic loop, just running for more iterations, since each dependent step naturally requires its own round-trip to let the model "see" the prior result before deciding the next action.
+
 **Explanation:** Demonstrates the loop's generality — dependent, sequential tool chains are not a special case architecturally.
+
 **Why Interviewers Ask This:** Tests deep understanding of how the loop generalizes to complex, realistic workflows.
+
 **Possible Follow-up:** "How would you reduce the extra latency this adds?"
 
-**Q22. A production agent occasionally calls a tool with hallucinated arguments not present in the user's message. Walk through your full debugging and mitigation strategy.**
+**Q22.**
+
+**Question:** A production agent occasionally calls a tool with hallucinated arguments not present in the user's message. Walk through your full debugging and mitigation strategy.
+
 **Answer:** (1) Inspect the tool's `description` and `parameters` for ambiguity or missing constraints; (2) check whether too many tools were in context, diluting focus — consider lazy-loading; (3) verify the model's capability tier — a weaker/smaller model is far more prone to this; (4) add explicit validation in your own tool-execution code (reject/clarify calls with implausible or out-of-range arguments) rather than trusting the model blindly; (5) consider adding a system-prompt rule reinforcing strict grounding ("only use arguments explicitly present in the user's message; ask for clarification otherwise").
+
 **Explanation:** A holistic, multi-layered mitigation strategy mirrors real production debugging.
+
 **Why Interviewers Ask This:** Senior-level troubleshooting competency check.
+
 **Possible Follow-up:** "How would you monitor for this issue at scale, in production, automatically?"
 
-**Q23. Explain the token-cost trade-off between sending full tool schemas on every call versus using a lazy-loading meta-tool pattern. When is lazy loading *not* worth the added complexity?**
+**Q23.**
+
+**Question:** Explain the token-cost trade-off between sending full tool schemas on every call versus using a lazy-loading meta-tool pattern. When is lazy loading *not* worth the added complexity?
+
 **Answer:** Full schemas cost more tokens per call but resolve tool selection in a single round-trip. Lazy loading (name+description first, full schema fetched only for the selected tool) reduces token cost significantly for large tool sets but adds an extra model round-trip (latency + one more API call) for every tool invocation. For small tool counts (roughly under ~10–20, exact threshold depends on schema size and latency budget), the added round-trip overhead of lazy loading may not be worth it — full schemas sent directly can be simpler and just as cost-effective.
+
 **Explanation:** Tests ability to reason about trade-offs quantitatively rather than applying "best practices" blindly.
+
 **Why Interviewers Ask This:** Distinguishes engineers who understand *why* a pattern helps from those who just apply it by rote.
+
 **Possible Follow-up:** "How would you empirically decide the right threshold for your specific system?"
 
-**Q24. Your agent needs to expose 200+ internal reporting tools. Propose a complete architecture, referencing concepts from this session.**
+**Q24.**
+
+**Question:** Your agent needs to expose 200+ internal reporting tools. Propose a complete architecture, referencing concepts from this session.
+
 **Answer:** A layered design: (1) group the 200 tools into logical sub-agents (e.g., by report category), each with its own focused tool list; (2) expose each sub-agent as a single "tool" with a clear description to a top-level orchestrator agent; (3) within each sub-agent, use lazy-loaded tool schemas (name+description first, full schema fetched via a meta-tool only for the selected tool) to keep even sub-agent-level context small; (4) use a strong model at the orchestrator level for accurate routing, and add human-in-the-loop confirmation for any tool with write/destructive effects; (5) log token usage and tool-selection accuracy for ongoing monitoring.
+
 **Explanation:** Synthesizes essentially every scaling technique covered in Section 9 into one coherent design.
+
 **Why Interviewers Ask This:** A realistic, senior-level system-design prompt directly informed by the actual Q&A scenario raised in class.
+
 **Possible Follow-up:** "How would this design change if latency were the primary constraint instead of token cost?"
 
-**Q25. Explain precisely why "structured output via Pydantic + prompting" and "native provider structured-output/JSON modes" solve the same underlying problem differently. What's the trade-off?**
+**Q25.**
+
+**Question:** Explain precisely why "structured output via Pydantic + prompting" and "native provider structured-output/JSON modes" solve the same underlying problem differently. What's the trade-off?
+
 **Answer:** Both aim to make LLM output machine-consumable. The prompting approach ("reply only in this JSON shape") relies on the model *following instructions*, with no hard guarantee of compliance — you must still defensively parse/clean/validate the string reply. Native structured-output modes (where supported) let the provider enforce schema conformance server-side, offering stronger guarantees but tying you to provider-specific features and potentially limiting flexibility/portability across providers.
+
 **Explanation:** Requires understanding both the manual mechanism taught in the session *and* awareness of the more advanced alternative it deliberately avoided teaching first.
+
 **Why Interviewers Ask This:** Tests depth beyond what was explicitly demonstrated — genuine understanding versus rote recall.
+
 **Possible Follow-up:** "When would you still prefer prompt-based structuring even if native structured output is available?"
 
-**Q26. How would you redesign the agentic loop to support asynchronous/parallel execution of multiple tool calls returned in a single model response?**
+**Q26.**
+
+**Question:** How would you redesign the agentic loop to support asynchronous/parallel execution of multiple tool calls returned in a single model response?
+
 **Answer:** When `message.tool_calls` contains multiple entries, instead of executing them in a `for` loop sequentially, dispatch them concurrently (e.g., via `asyncio.gather` or a thread/task pool), collect all results, then append all of them back into `messages` (each tagged with its corresponding `tool_call_id`) before making the next model call. This reduces total latency when tool calls are independent (e.g., weather for two different cities), while preserving correctness by still waiting for **all** results before continuing the loop.
+
 **Explanation:** Extends the baseline synchronous loop taught in class to a realistic, higher-performance production variant.
+
 **Why Interviewers Ask This:** Tests ability to extend a taught pattern into a non-trivial, correct engineering enhancement.
+
 **Possible Follow-up:** "What happens if one of the parallel tool calls fails while others succeed?"
 
-**Q27. Critically evaluate: "Since frameworks like LangChain make agent creation trivial, understanding the raw agentic loop by hand is unnecessary for most engineers." Do you agree?**
+**Q27.**
+
+**Question:** Critically evaluate: "Since frameworks like LangChain make agent creation trivial, understanding the raw agentic loop by hand is unnecessary for most engineers." Do you agree?
+
 **Answer:** Disagree, or agree only partially. Frameworks abstract away the mechanics (message formatting, loop control, schema generation via decorators), which speeds up development — but engineers who don't understand what's underneath struggle to debug non-happy-path failures (hallucinated tool calls, runaway loops, token blowups, schema mismatches), cannot make informed cost/latency trade-offs, and are limited to whatever the framework's abstractions expose. Deep understanding is what differentiates an engineer who can *build/customize/debug* agent systems from one who can only *wire together* prebuilt components — directly echoing the instructor's stated rationale for this entire session.
+
 **Explanation:** An open-ended, judgment-based question mirroring the session's own explicit pedagogical thesis.
+
 **Why Interviewers Ask This:** Assesses engineering maturity and depth of thinking, not just factual recall.
+
 **Possible Follow-up:** "Give a concrete example of a bug you could diagnose only because you understood the raw loop."
 
-**Q28. What security/privacy risk is introduced the moment a tool's output is appended back into `messages` and sent to a third-party-hosted model, and how would you architect around it for a regulated industry (e.g., banking)?**
+**Q28.**
+
+**Question:** What security/privacy risk is introduced the moment a tool's output is appended back into `messages` and sent to a third-party-hosted model, and how would you architect around it for a regulated industry (e.g., banking)?
+
 **Answer:** Any data returned by a tool (which may include PII, financial records, internal system details, etc.) becomes part of the payload transmitted to the model provider on the very next loop iteration — effectively leaving your infrastructure's trust boundary. For regulated industries, mitigate via: self-hosted/open-source models within your own VPC, provider offerings with contractual data-non-retention/zero-data-retention guarantees, redacting/masking sensitive fields from tool output before it re-enters the message history, and/or routing only non-sensitive summarized data back to the model while keeping raw sensitive data in a separate, access-controlled system.
+
 **Explanation:** Extends the session's brief privacy discussion into a fuller, regulation-aware answer.
+
 **Why Interviewers Ask This:** Tests whether a candidate can connect architecture decisions to compliance/regulatory reality — critical for enterprise AI roles.
+
 **Possible Follow-up:** "How would zero-data-retention agreements with a provider change your architecture?"
 
-**Q29. Explain why a smaller/weaker LLM is more prone to tool-calling failures than a larger, more capable one, in terms of what's actually happening during inference.**
+**Q29.**
+
+**Question:** Explain why a smaller/weaker LLM is more prone to tool-calling failures than a larger, more capable one, in terms of what's actually happening during inference.
+
 **Answer:** Tool selection and argument extraction require the model to reason over natural-language descriptions, disambiguate between similar options, and follow structured formatting instructions precisely — capabilities that scale with model size/training quality. Smaller models have less capacity to hold and reason over this instruction-following + disambiguation task simultaneously, especially as the number of tools/complexity of instructions grows, leading to higher rates of ignoring instructions, calling the wrong tool, or fabricating arguments.
+
 **Explanation:** Connects an observed empirical behavior (repeatedly noted in the Q&A: "small models don't call multiple tools correctly") to underlying model-capability reasoning.
+
 **Why Interviewers Ask This:** Tests ability to reason about *why* observed behavior happens, not just recall that it does.
+
 **Possible Follow-up:** "How would you validate whether a smaller model is 'good enough' for your specific tool-calling use case before deploying it?"
 
-**Q30. Design a monitoring/observability strategy for a production agentic system built on the raw loop taught in this session.**
+**Q30.**
+
+**Question:** Design a monitoring/observability strategy for a production agentic system built on the raw loop taught in this session.
+
 **Answer:** Track, per request: total loop iterations used (vs. `max_iterations` cap), per-call token usage (prompt/completion/total), which tools were selected and their arguments, tool execution success/failure rates and latencies, cases where the loop was terminated by hitting the iteration cap (a strong signal of a stuck/looping agent), and end-user-visible latency. Layer on top: alerting on anomalous spikes in iteration counts or token usage (possible tool-description regressions or hallucination spikes), and periodic sampling of tool-selection accuracy against a labeled test set as the tool catalog grows.
+
 **Explanation:** Synthesizes cost guardrails, loop mechanics, and hallucination-detection concerns from the whole session into a coherent operational plan.
+
 **Why Interviewers Ask This:** Senior/production-readiness system-design question distinguishing prototype-builders from production-owners.
+
 **Possible Follow-up:** "What's your rollback/circuit-breaker strategy if tool-selection accuracy degrades after a model version update?"
 
 ---

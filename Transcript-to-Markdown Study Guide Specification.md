@@ -146,17 +146,18 @@ Explain mistakes developers commonly make.
 
 Summarize the most important points.
 
+### 🚀 Mindmap
+
+Mindmap the entire section
+
 ---
 
 # ⭐ IMPORTANT: Contextual Visuals, Diagrams, Workflows & Code
 
 **Flow Diagrams, Visual Representations, Code Examples, and Step-by-Step Workflows are NOT separate top-level sections of the document.**
 
-They must be inserted **inside the relevant logical topic/sub-topic** whenever they help explain that particular concept.
+They must be inserted **inside the relevant logical topic/sub-topic** to help explain that particular concept.
 
-### Rule:
-
-> **If a concept can be understood significantly better through a diagram, visual representation, workflow, or code example, include it directly within that concept's section.**
 
 Do **not** create generic sections such as:
 
@@ -197,9 +198,6 @@ Explanation...
 5. Response is returned
 ```
 
-Only add these sub-sections **when they are relevant**.
-
-Do not force diagrams or code into every section.
 
 ---
 
@@ -592,6 +590,8 @@ A very short summary of the entire session.
 
 Include only the highest-value concepts.
 
+All points should be in bullet points.
+
 ---
 
 # 📋 Cheat Sheet
@@ -614,6 +614,7 @@ Only include items relevant to the session.
 # 🔥 Interview Preparation
 
 Create a dedicated interview preparation section at the end.
+Question and Answer should in differnt line. Make it as beautiful.
 
 Divide questions into:
 
@@ -821,7 +822,7 @@ Before finalizing the Markdown file, verify:
 
 They are **explanatory tools**.
 
-Whenever a logical section or sub-section would benefit from one of them, insert it **directly into that section**.
+a logical section or sub-section would benefit from them, insert them **directly into that section**.
 
 Use your judgment.
 

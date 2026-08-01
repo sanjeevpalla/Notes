@@ -97,6 +97,19 @@ These three messages — deliberately varied in phrasing, intent (booking vs. ca
 
 ### 2. The Core Problem: Why Free-Text Extraction Fails
 
+```mermaid
+flowchart TD
+    A["Same instruction:<br/>'Extract customer name, movie, action'"] --> B["Message 1"]
+    A --> C["Message 2"]
+    A --> D["Message 3"]
+    B --> E["Keys: name, movie, action"]
+    C --> F["JSON, but DIFFERENT key names"]
+    D --> G["Keys: customer_name, movie, request"]
+    E --> H["❌ Three incompatible shapes —<br/>downstream code cannot rely on any of them"]
+    F --> H
+    G --> H
+```
+
 #### ⚙ How It Works — The Failing Approach
 
 ```python
@@ -122,6 +135,15 @@ for message in messages:
 ---
 
 ### 3. The Fix: with_structured_output() and Pydantic Schemas
+
+```mermaid
+flowchart LR
+    A["Same 3 messages,<br/>same varied phrasing"] --> B["model.with_structured_output(BookingRequest)"]
+    B --> C["Every response is now<br/>a genuine BookingRequest object"]
+    C --> D["result.action — always this exact field"]
+    C --> E["result.customer_name — always this exact field"]
+    C --> F["✅ Reliable, addressable, identical shape<br/>across every call"]
+```
 
 #### 💻 Code Example
 
@@ -163,6 +185,13 @@ print(result.customer_name)
 ---
 
 ### 4. Two Strategies: Provider Strategy vs. Tool Strategy
+
+```mermaid
+flowchart TD
+    A["with_structured_output(Schema)"] --> B{"Does the model/provider<br/>natively support structured output?"}
+    B -->|Yes, automatic default| C["Provider Strategy<br/>fast, native — but ONLY works<br/>where the provider supports it"]
+    B -->|"Explicitly requested,<br/>or provider unsupported"| D["Tool Strategy<br/>synthetic tool-call fallback —<br/>works almost everywhere, more configurable"]
+```
 
 #### 📖 Definition
 
@@ -219,6 +248,14 @@ model_with_structure = model.with_structured_output(
 ---
 
 ### 5. The Real Interview Question: What If Your Model Doesn't Support It?
+
+```mermaid
+flowchart TD
+    A["Interview question:<br/>'What if your model doesn't support<br/>structured output natively?'"] --> B{"Weak answer:<br/>'response_format just handles it'"}
+    B -->|"❌ Incomplete —<br/>defaults to Provider Strategy,<br/>which can silently fail"| C["Check model.profile first<br/>(e.g. gpt-3.5-turbo: NOT supported)"]
+    C --> D["✅ Strong answer:<br/>explicitly use ToolStrategy"]
+    D --> E["Works almost anywhere tool calling works,<br/>independent of native support"]
+```
 
 #### ❓ Why It Exists
 
@@ -307,6 +344,16 @@ flowchart LR
 ---
 
 ### 7. Multi-Schema Support: Union Types for Multiple Intents
+
+```mermaid
+flowchart TD
+    A["response_format=ToolStrategy(schema=Union[NewBooking, CancelBooking])"] --> B["Single agent receives a message"]
+    B --> C{"Model reads intent<br/>from the message itself"}
+    C -->|"'I want to cancel...'"| D["Returns a CancelBooking object"]
+    C -->|"'I would like to book...'"| E["Returns a NewBooking object"]
+    D --> F["isinstance() check downstream<br/>routes to the right handler"]
+    E --> F
+```
 
 #### ❓ Why It Exists
 
@@ -416,6 +463,15 @@ print(result["structured_response"])   # the final, validated object only
 
 ### 9. The handle_errors Parameter: True, False, String & Custom
 
+```mermaid
+flowchart TD
+    A["Structured output fails<br/>Pydantic validation"] --> B{"handle_errors setting?"}
+    B -->|"True (default)"| C["Default error template sent back —<br/>automatic retry"]
+    B -->|"'custom string'"| D["YOUR precise message sent back —<br/>automatic retry, often fewer turns"]
+    B -->|"ExceptionType"| E["Only THAT exception type caught —<br/>default message used"]
+    B -->|"False"| F["Nothing caught —<br/>error propagates, call fails outright"]
+```
+
 #### 📖 Definition
 
 `ToolStrategy`'s `handle_errors` parameter controls **precisely how** a structured-output validation failure is surfaced back to the model (or the developer) — demonstrated live in all its major configurations.
@@ -469,6 +525,15 @@ strategy = ToolStrategy(
 
 ### 10. ToolMessage.artifact: Extra Data the Model Never Sees
 
+```mermaid
+flowchart LR
+    A["Tool returns a result"] --> B["ToolMessage created"]
+    B --> C[".content"]
+    B --> D[".artifact"]
+    C --> E["Sent back to the model —<br/>this is what it reasons over"]
+    D --> F["NEVER sent to the model —<br/>available only to your application/UI<br/>(citation links, document IDs, etc.)"]
+```
+
 #### 📖 Definition
 
 > 💡 **Memory Trick, stated directly:** *"`.content` is what the model reads. `.artifact` on a tool message is extra data your application can use, which is never sent to the model — citation links, document IDs, anything the model doesn't need but your UI does."*
@@ -481,6 +546,15 @@ strategy = ToolStrategy(
 ---
 
 ### 11. Business Logic vs. AI Logic: Where Validation Responsibility Belongs
+
+```mermaid
+flowchart TD
+    A["Request exceeds a real-world limit<br/>(e.g. 15 tickets, only 10 allowed)"] --> B{"How consequential<br/>is this action?"}
+    B -->|"Low-stakes<br/>(e.g. UI quantity correction)"| C["Silent auto-correction via<br/>schema validation + retry is fine"]
+    B -->|"High-stakes<br/>(e.g. charging a credit card,<br/>irreversible booking)"| D["Explicit error required —<br/>handle_errors=False + your own try/except"]
+    C --> E["This is a BUSINESS-LOGIC decision,<br/>not something 'AI' decides on its own"]
+    D --> E
+```
 
 #### ❓ Why It Exists
 
@@ -541,7 +615,23 @@ No Tools-specific or Agents-specific mechanics (tool decorators beyond what was 
 
 ## 🔄 Revision Notes — One-Minute Revision
 
-> This session teaches **structured output** in exhaustive depth, entirely through building "CineBot," a movie-ticket-booking assistant. The core problem: asking a model to extract fields via plain, unstructured text produces **inconsistent key names and formats** across calls — demonstrated live with three sample messages, each returning a differently-shaped response. The fix: **`model.with_structured_output(YourPydanticModel)`**, using `Literal[...]` to pin fields to known values. Underneath, LangChain guarantees this via one of **two strategies**: **Provider Strategy** (fast, native, only works when the specific model/provider supports it — the automatic default when available) or **Tool Strategy** (a universally-compatible synthetic tool-call fallback, with slightly more overhead but genuinely more configurability). The real, differentiating interview question this session builds toward: *"What if your model doesn't support structured output natively?"* — answered correctly by using `ToolStrategy`, checkable via **`model.profile`** (demonstrated live on `gpt-3.5-turbo`, a real model lacking native support). A separate, deliberately staged demonstration proves that a **raw model — even with both tools bound and structured output configured — still cannot loop or orchestrate multiple steps on its own**; only wrapping it in `create_agent(tools=..., response_format=...)` provides that capability, directly answering "why are agents required?" **Union-typed schemas** (`Union[NewBooking, CancelBooking]`, supported only by `ToolStrategy`) let a single agent correctly choose among multiple possible output shapes based on message intent — a genuinely underused, powerful feature. When structured output fails Pydantic validation (demonstrated live under a deliberate prompt-injection attempt requesting an out-of-bounds ticket count), LangChain **automatically feeds the validation error back to the model and retries** — with zero additional code, governed by the **`handle_errors`** parameter (`True` = default retry template; a custom string = your own precise corrective message; a specific exception type; or `False` = let the error propagate, requiring your own `try`/`except`). `ToolMessage.artifact` carries extra data never sent to the model, distinct from `.content`. Finally, an extended Q&A clarifies that whether an out-of-bounds request should be silently corrected or explicitly surfaced as an error to the user is a **business-logic decision governed by real-world stakes**, not something AI decides on its own — directly using the Amazon cart-quantity-limit analogy. **Tools and Agents**, despite being named in this session's opening plan, are explicitly deferred to the next class.
+* This session teaches **structured output** in exhaustive depth, entirely through building "CineBot," a movie-ticket-booking assistant.
+* **The core problem:** asking a model to extract fields via plain, unstructured text produces **inconsistent key names and formats** across calls — demonstrated live with three sample messages, each returning a differently-shaped response.
+* **The fix:** `model.with_structured_output(YourPydanticModel)`, using `Literal[...]` to pin fields to known values.
+* LangChain guarantees this via one of **two strategies**:
+  * **Provider Strategy** — fast, native, only works when the specific model/provider supports it (the automatic default when available).
+  * **Tool Strategy** — a universally-compatible synthetic tool-call fallback, with slightly more overhead but genuinely more configurability.
+* **The real, differentiating interview question:** *"What if your model doesn't support structured output natively?"* — answered correctly by using `ToolStrategy`, checkable via **`model.profile`** (demonstrated live on `gpt-3.5-turbo`, a real model lacking native support).
+* A deliberately staged demonstration proves a **raw model — even with both tools bound and structured output configured — still cannot loop or orchestrate multiple steps on its own**; only wrapping it in `create_agent(tools=..., response_format=...)` provides that capability, directly answering "why are agents required?"
+* **Union-typed schemas** (`Union[NewBooking, CancelBooking]`, supported only by `ToolStrategy`) let a single agent correctly choose among multiple possible output shapes based on message intent — a genuinely underused, powerful feature.
+* When structured output fails Pydantic validation (demonstrated live under a deliberate prompt-injection attempt requesting an out-of-bounds ticket count), LangChain **automatically feeds the validation error back to the model and retries** — zero additional code required, governed by the **`handle_errors`** parameter:
+  * `True` = default retry template.
+  * A custom string = your own precise corrective message.
+  * A specific exception type = only that type is caught.
+  * `False` = the error propagates, requiring your own `try`/`except`.
+* `ToolMessage.artifact` carries extra data never sent to the model, distinct from `.content`.
+* An extended Q&A clarifies that whether an out-of-bounds request should be silently corrected or explicitly surfaced as an error to the user is a **business-logic decision governed by real-world stakes**, not something AI decides on its own — directly using the Amazon cart-quantity-limit analogy.
+* **Tools and Agents**, despite being named in this session's opening plan, are explicitly deferred to the next class.
 
 ---
 
@@ -609,162 +699,312 @@ False               → error propagates, you handle it yourself
 
 ### 🟢 Beginner
 
-**Q1. Why does asking a model to "extract fields" via plain text often produce inconsistent results?**
+**Q1.**
+
+**Question:** Why does asking a model to "extract fields" via plain text often produce inconsistent results?
+
 **Answer:** Without an imposed structure, the model is free to choose its own key names and formats each time, producing different shapes across calls — demonstrated live with three messages returning three differently-keyed responses.
+
 **Explanation:** The core motivating problem for this entire session.
-**Why This Matters:** Establishes why structured output exists at all.
+
+**Why Interviewers Ask This:** Establishes why structured output exists at all.
+
 **Possible Follow-up:** "What LangChain method directly fixes this?"
 
-**Q2. What does `Literal["book", "cancel"]` accomplish in a Pydantic field?**
+**Q2.**
+
+**Question:** What does `Literal["book", "cancel"]` accomplish in a Pydantic field?
+
 **Answer:** It pins the field's value to one of a fixed, known set of options, preventing the model from inventing arbitrary phrasing for the same underlying concept.
+
 **Explanation:** Directly demonstrated as the fix for the "action" vs. "request" inconsistency.
-**Why This Matters:** A practical, frequently-used Pydantic/typing pattern.
+
+**Why Interviewers Ask This:** A practical, frequently-used Pydantic/typing pattern.
+
 **Possible Follow-up:** "What happens if the model tries to return a value not in the Literal's set?"
 
-**Q3. Name LangChain's two strategies for guaranteeing structured output.**
+**Q3.**
+
+**Question:** Name LangChain's two strategies for guaranteeing structured output.
+
 **Answer:** Provider Strategy and Tool Strategy.
+
 **Explanation:** The session's central technical distinction.
-**Why This Matters:** Explicitly named as a genuine, differentiating interview topic.
+
+**Why Interviewers Ask This:** Explicitly named as a genuine, differentiating interview topic.
+
 **Possible Follow-up:** "Which one is used by default?"
 
-**Q4. What does `model.profile` reveal?**
+**Q4.**
+
+**Question:** What does `model.profile` reveal?
+
 **Answer:** A model's real capabilities, including whether it natively supports structured output, its release date, and other properties.
+
 **Explanation:** Demonstrated live on `gpt-3.5-turbo`.
-**Why This Matters:** A direct, practical compatibility-checking tool.
+
+**Why Interviewers Ask This:** A direct, practical compatibility-checking tool.
+
 **Possible Follow-up:** "Why is checking this important before assuming provider strategy will work?"
 
-**Q5. What is the correct fallback when a model doesn't support native structured output?**
+**Q5.**
+
+**Question:** What is the correct fallback when a model doesn't support native structured output?
+
 **Answer:** `ToolStrategy` — it fakes structured output via a synthetic tool call, working almost anywhere tool calling itself is supported.
+
 **Explanation:** The session's stated "real interview answer."
-**Why This Matters:** Directly tests the core lesson of this entire session.
+
+**Why Interviewers Ask This:** Directly tests the core lesson of this entire session.
+
 **Possible Follow-up:** "What's the trade-off of using ToolStrategy versus ProviderStrategy?"
 
-**Q6. Can a raw model with tools bound and structured output configured loop through multiple steps on its own?**
+**Q6.**
+
+**Question:** Can a raw model with tools bound and structured output configured loop through multiple steps on its own?
+
 **Answer:** No — it makes only a single call and can return either a tool-call request or structured output, never both, and cannot loop between them.
+
 **Explanation:** Directly, live demonstrated as a real failure.
-**Why This Matters:** The concrete proof for why agents are necessary.
+
+**Why Interviewers Ask This:** The concrete proof for why agents are necessary.
+
 **Possible Follow-up:** "What LangChain construct fixes this?"
 
-**Q7. What does `Union[SchemaA, SchemaB]` allow a model to do?**
+**Q7.**
+
+**Question:** What does `Union[SchemaA, SchemaB]` allow a model to do?
+
 **Answer:** Choose the most appropriate structured output schema for a given message, based on its actual intent — rather than being locked to one fixed schema.
+
 **Explanation:** Demonstrated live with a `NewBooking` vs. `CancelBooking` example.
-**Why This Matters:** A genuinely underused, powerful architectural pattern.
+
+**Why Interviewers Ask This:** A genuinely underused, powerful architectural pattern.
+
 **Possible Follow-up:** "Which strategy — provider or tool — supports Union schemas?"
 
-**Q8. What happens automatically when structured output fails Pydantic validation, under `ToolStrategy`'s default settings?**
+**Q8.**
+
+**Question:** What happens automatically when structured output fails Pydantic validation, under `ToolStrategy`'s default settings?
+
 **Answer:** The validation error is automatically fed back to the model as a message, and the model retries — with zero additional code required.
+
 **Explanation:** Demonstrated live under a deliberate prompt-injection attempt.
-**Why This Matters:** A core, powerful, often-unknown LangChain behavior.
+
+**Why Interviewers Ask This:** A core, powerful, often-unknown LangChain behavior.
+
 **Possible Follow-up:** "What parameter controls this behavior?"
 
-**Q9. What are the four possible values/behaviors of `handle_errors`?**
+**Q9.**
+
+**Question:** What are the four possible values/behaviors of `handle_errors`?
+
 **Answer:** `True` (default error template, automatic retry), a custom string (automatic retry with your own message), a specific exception type (only catches that type), and `False` (error propagates, no automatic handling).
+
 **Explanation:** All four demonstrated live.
-**Why This Matters:** Precise, practical error-handling configuration knowledge.
+
+**Why Interviewers Ask This:** Precise, practical error-handling configuration knowledge.
+
 **Possible Follow-up:** "Why might a vague custom error message actually be worse than the default?"
 
-**Q10. What is the difference between `ToolMessage.content` and `ToolMessage.artifact`?**
+**Q10.**
+
+**Question:** What is the difference between `ToolMessage.content` and `ToolMessage.artifact`?
+
 **Answer:** `.content` is what the model actually reads; `.artifact` is extra data attached for the application's use, never sent to the model.
+
 **Explanation:** Directly stated and defined.
-**Why This Matters:** A precise, useful distinction for real application design.
+
+**Why Interviewers Ask This:** A precise, useful distinction for real application design.
+
 **Possible Follow-up:** "Give an example of data that belongs in .artifact but not .content."
 
 ---
 
 ### 🟡 Intermediate
 
-**Q11. A learner proposes answering an interview question about structured-output reliability by saying "LangChain's `response_format` handles it automatically." Why is this an incomplete answer?**
+**Q11.**
+
+**Question:** A learner proposes answering an interview question about structured-output reliability by saying "LangChain's `response_format` handles it automatically." Why is this an incomplete answer?
+
 **Answer:** Because `response_format`/`with_structured_output()` without an explicit strategy defaults to `ProviderStrategy`, which only works if the underlying model natively supports structured output — an incomplete answer that ignores what happens when the model doesn't (e.g., a company's own nascent internal model, or older models like `gpt-3.5-turbo`). The complete answer requires explicitly naming `ToolStrategy` as the fallback and explaining its mechanism (synthetic tool calling).
+
 **Explanation:** Directly addresses the session's central "99% of people get filtered" interview scenario.
-**Why This Matters:** Tests whether a learner internalized the full depth of the lesson, not just the surface-level API call.
+
+**Why Interviewers Ask This:** Tests whether a learner internalized the full depth of the lesson, not just the surface-level API call.
+
 **Possible Follow-up:** "What specifically would happen if ProviderStrategy were used on a model that doesn't support it?"
 
-**Q12. Explain, mechanically, why binding both tools and structured output to a raw model still fails to produce a fully correct answer to a request needing both a tool call and structured output.**
+**Q12.**
+
+**Question:** Explain, mechanically, why binding both tools and structured output to a raw model still fails to produce a fully correct answer to a request needing both a tool call and structured output.
+
 **Answer:** A single model invocation results in a single API call to the underlying provider, and the model can only return one kind of response per call — either a request to call a tool, or a structured output object — never a sequence of both within the same invocation, and with no mechanism to automatically loop back after a tool result arrives. The "loop" behavior (call tool → get result → decide again → eventually produce structured output) requires an orchestrating layer, which a raw model, by itself, does not provide.
+
 **Explanation:** A precise mechanical explanation, not just an assertion that "agents are needed."
-**Why This Matters:** Tests genuine understanding of the underlying mechanism, connecting directly back to earlier sessions' agentic-loop coverage.
+
+**Why Interviewers Ask This:** Tests genuine understanding of the underlying mechanism, connecting directly back to earlier sessions' agentic-loop coverage.
+
 **Possible Follow-up:** "How does create_agent specifically provide this looping capability?"
 
-**Q13. Why does the instructor consider Union-typed schema support "genuinely underused" and prefer it over creating multiple separate agents for different intents?**
+**Q13.**
+
+**Question:** Why does the instructor consider Union-typed schema support "genuinely underused" and prefer it over creating multiple separate agents for different intents?
+
 **Answer:** A single agent with a Union-typed schema centralizes intent classification and structured extraction into one model call, letting the model's own understanding of context determine the correct output shape — avoiding the architectural overhead and coordination complexity of routing a request to one of several separate agents based on some external classification step.
+
 **Explanation:** Directly stated and demonstrated live with a working cancel/book example.
-**Why This Matters:** A genuine architectural preference with real, demonstrated justification.
+
+**Why Interviewers Ask This:** A genuine architectural preference with real, demonstrated justification.
+
 **Possible Follow-up:** "At what point might separate agents actually become preferable to one Union-schema agent?"
 
-**Q14. Trace, step by step, what happened internally when CineBot was sent a prompt-injection attempt requesting 15 tickets against a schema capped at 10.**
+**Q14.**
+
+**Question:** Trace, step by step, what happened internally when CineBot was sent a prompt-injection attempt requesting 15 tickets against a schema capped at 10.
+
 **Answer:** (1) The model's first attempt returned `ticket_count=15`, genuinely susceptible to the manipulative framing in the message; (2) Pydantic validation on the `SeatBooking` schema failed, since 15 exceeds the `le=10` constraint; (3) LangChain automatically packaged this validation error into a `ToolMessage` and sent it back to the model as part of the ongoing conversation; (4) the model's second attempt correctly returned `ticket_count=10`; (5) validation passed, and the final structured response was returned — representing a total of two model "turns" for this single logical request.
+
 **Explanation:** A precise, ordered reconstruction of the live-demonstrated trace.
-**Why This Matters:** Tests the ability to read and explain a real agent execution trace — directly connected to the session's "how many turns did your agent take?" interview framing.
+
+**Why Interviewers Ask This:** Tests the ability to read and explain a real agent execution trace — directly connected to the session's "how many turns did your agent take?" interview framing.
+
 **Possible Follow-up:** "How would you determine this turn count programmatically, from the result object, rather than by visual inspection?"
 
-**Q15. Why did the instructor's first attempt at a custom `handle_errors` message result in MORE retries, not fewer, compared to the default?**
+**Q15.**
+
+**Question:** Why did the instructor's first attempt at a custom `handle_errors` message result in MORE retries, not fewer, compared to the default?
+
 **Answer:** Because the custom message he initially wrote was vague and didn't clearly communicate what specifically was wrong with the model's output — leaving the model to guess at the correction needed across multiple additional attempts, whereas a subsequent, more precise custom message ("ticket count should not be greater than 10") resolved the issue in far fewer turns.
+
 **Explanation:** A real, live, unedited example of the custom-message quality mattering in practice.
-**Why This Matters:** A genuinely important practical lesson: custom error messages are not "free" — their quality directly affects retry efficiency and cost.
+
+**Why Interviewers Ask This:** A genuinely important practical lesson: custom error messages are not "free" — their quality directly affects retry efficiency and cost.
+
 **Possible Follow-up:** "What general principle would you apply when writing a custom handle_errors message to avoid this pitfall?"
 
-**Q16. Using the Amazon cart-quantity example, explain why "the AI made a mistake" is the wrong framing for a case where an application correctly caps a request at an available limit.**
+**Q16.**
+
+**Question:** Using the Amazon cart-quantity example, explain why "the AI made a mistake" is the wrong framing for a case where an application correctly caps a request at an available limit.
+
 **Answer:** Capping a request (e.g., 100 iPhones down to 12 available) and clearly communicating that limit to the user is standard, correct application/business-logic behavior — it is not a flaw or "mistake" in the AI layer; the AI/schema layer's job is only to guarantee the *shape* and *bounds* of the data, while deciding *how* to respond to an out-of-bounds request (silently cap vs. explicitly error) is an application design decision, independent of whether AI is involved at all.
+
 **Explanation:** Directly reflects the extended Q&A resolution in Section 11.
-**Why This Matters:** Prevents conflating a legitimate business-logic design choice with an "AI failure."
+
+**Why Interviewers Ask This:** Prevents conflating a legitimate business-logic design choice with an "AI failure."
+
 **Possible Follow-up:** "In what scenario would silently capping a value instead be the WRONG choice?"
 
-**Q17. Why does the instructor say "that's a problem with the people who built it" regarding an agent that could silently overcharge a credit card for an out-of-bounds request?**
+**Q17.**
+
+**Question:** Why does the instructor say "that's a problem with the people who built it" regarding an agent that could silently overcharge a credit card for an out-of-bounds request?
+
 **Answer:** Because for any action with genuine real-world, potentially irreversible consequences (charging a payment method), it is the responsibility of the system's designers to ensure explicit confirmation or an explicit error is surfaced before such an action executes — silently "correcting" and proceeding with a financial transaction the user didn't actually request is a design/engineering failure at the application level, not an inherent risk of using AI.
+
 **Explanation:** Directly addresses a genuinely important, extended Q&A exchange about agent safety.
-**Why This Matters:** A real, senior-level system-design consideration connecting structured output validation to genuine safety/reliability engineering.
+
+**Why Interviewers Ask This:** A real, senior-level system-design consideration connecting structured output validation to genuine safety/reliability engineering.
+
 **Possible Follow-up:** "What handle_errors configuration would you use for a payment-related structured output field, and why?"
 
-**Q18. What is the significance of `model.profile` confirming `gpt-3.5-turbo` does NOT support structured output, in the context of this session's central interview scenario?**
+**Q18.**
+
+**Question:** What is the significance of `model.profile` confirming `gpt-3.5-turbo` does NOT support structured output, in the context of this session's central interview scenario?
+
 **Answer:** It transforms an abstract, hypothetical interview question ("what if your model doesn't support structured output?") into a concrete, verifiable, real-world example — `gpt-3.5-turbo` is a genuinely real, once-widely-used model that a learner could plausibly encounter in an actual legacy system, making the tool-strategy fallback knowledge directly, practically applicable rather than purely theoretical.
+
 **Explanation:** Connects the interview framing to a concrete, demonstrated proof.
-**Why This Matters:** Reinforces that this session's depth is grounded in real, checkable facts, not hypothetical scenarios alone.
+
+**Why Interviewers Ask This:** Reinforces that this session's depth is grounded in real, checkable facts, not hypothetical scenarios alone.
+
 **Possible Follow-up:** "Name another real model, besides GPT-3.5-Turbo, likely to lack native structured-output support, and how you'd verify it."
 
-**Q19. Why does the instructor argue that `ToolStrategy`'s greater configurability (custom tool message content, `handle_errors` options) is a genuine advantage, not just a compatibility fallback?**
+**Q19.**
+
+**Question:** Why does the instructor argue that `ToolStrategy`'s greater configurability (custom tool message content, `handle_errors` options) is a genuine advantage, not just a compatibility fallback?
+
 **Answer:** Because `ProviderStrategy`, by relying entirely on the provider's own built-in feature, offers minimal developer-facing configuration — you either get the schema or an error, with little control over the failure-recovery process — whereas `ToolStrategy` exposes explicit, developer-controlled parameters (custom messages, configurable error handling) that let you shape exactly how the model recovers from mistakes, making it strictly more powerful for use cases needing that level of control, even when the model in question WOULD support provider strategy.
+
 **Explanation:** Directly confirmed in the live Q&A ("tool strategy gives us more control... we can still apply tool strategy [even with a provider-strategy-capable model], not a problem").
-**Why This Matters:** Tests whether a learner understands ToolStrategy as more than "just the fallback for unsupported models."
+
+**Why Interviewers Ask This:** Tests whether a learner understands ToolStrategy as more than "just the fallback for unsupported models."
+
 **Possible Follow-up:** "Describe a scenario where you'd deliberately choose ToolStrategy even though the model supports ProviderStrategy natively."
 
-**Q20. Explain why the instructor calls documentation-reading "the one skill" he'd give from his classes, using the Union-schema-support example as evidence.**
+**Q20.**
+
+**Question:** Explain why the instructor calls documentation-reading "the one skill" he'd give from his classes, using the Union-schema-support example as evidence.
+
 **Answer:** The specific fact that only `ToolStrategy` (not `ProviderStrategy`) supports `Union`-typed schemas was determined live, directly from LangChain's own documentation — not from AI-assisted guessing, which the instructor explicitly notes performs poorly on this kind of precise, structural API detail. This is presented as direct evidence that documentation literacy provides answers AI tools themselves cannot reliably reproduce.
+
 **Explanation:** A specific, demonstrated example directly supporting the instructor's broader, repeated claim about documentation-reading as a differentiating skill.
-**Why This Matters:** Reinforces a genuinely transferable professional habit with concrete, not just rhetorical, justification.
+
+**Why Interviewers Ask This:** Reinforces a genuinely transferable professional habit with concrete, not just rhetorical, justification.
+
 **Possible Follow-up:** "What made this particular documentation detail hard to guess correctly without checking?"
 
 ---
 
 ### 🔴 Advanced
 
-**Q21. Design a decision framework for choosing between silent auto-correction (schema validation + retry) and explicit error surfacing (`handle_errors=False` + custom `try`/`except`) for a new structured-output field in a production system.**
+**Q21.**
+
+**Question:** Design a decision framework for choosing between silent auto-correction (schema validation + retry) and explicit error surfacing (`handle_errors=False` + custom `try`/`except`) for a new structured-output field in a production system.
+
 **Answer:** Assess the field along two axes: (1) **reversibility** — can an incorrect-but-plausible auto-corrected value be easily undone or is it consequential/irreversible (e.g., a financial transaction, an irreversible booking)? (2) **user expectation clarity** — would a user reasonably expect to be informed if their request was adjusted (e.g., "you asked for 15, we booked 10"), or is silent correction genuinely unsurprising and low-stakes (e.g., rounding a slightly malformed but clearly-intended date format)? For fields where the answer to either axis leans toward "consequential" or "user should know," use `handle_errors=False` with explicit, user-facing error messaging built via your own `try`/`except` logic — directly following the session's payment/booking safety reasoning. For low-stakes, clearly-recoverable fields where auto-correction genuinely matches user intent, the default `handle_errors=True` retry loop (or a precise custom message) is appropriate and more convenient.
+
 **Explanation:** Synthesizes Sections 8, 9, and 11 into an actionable, generalizable engineering decision framework, rather than restating the specific ticket-count example alone.
+
 **Why Interviewers Ask This:** Tests whether a candidate can generalize a specific taught example into a broader, reusable engineering principle.
+
 **Possible Follow-up:** "Where would you place a field like 'requested delivery date' on this framework, and why?"
 
-**Q22. Critically evaluate: "Since ToolStrategy automatically retries on validation failure, schema constraints (like `le=10`) effectively make bad output impossible." Is this accurate?**
+**Q22.**
+
+**Question:** Critically evaluate: "Since ToolStrategy automatically retries on validation failure, schema constraints (like `le=10`) effectively make bad output impossible." Is this accurate?
+
 **Answer:** Not fully accurate. The automatic retry loop significantly *reduces* the likelihood of an invalid final structured response reaching your application, but it does not make bad output *impossible* — this session itself demonstrates real failure modes even with retry enabled: `handle_errors=False` disables the retry entirely (a real configuration choice); a sufficiently persistent or cleverly-crafted adversarial input could, in principle, exhaust some maximum retry count without ever producing valid output (a scenario not explicitly demonstrated in this session but a reasonable, inferable edge case given that the retries are bounded, not infinite); and schema constraints only validate what's expressible in the schema itself — a value that is schema-valid but still semantically wrong for the actual business context (e.g., a syntactically valid but nonsensical customer name) would pass validation without ever triggering a retry. The accurate, more precise claim: retry-and-validate substantially improves reliability, but genuine guarantees require additional application-level checks beyond schema validation alone.
+
 **Explanation:** Tests whether a learner over-generalizes a genuinely powerful mechanism into an absolute, inaccurate guarantee — correctly identifying real limits the session itself either demonstrates or reasonably implies.
+
 **Why Interviewers Ask This:** Distinguishes candidates who track the precise scope of a guarantee from those who round it up to "impossible to fail."
+
 **Possible Follow-up:** "Design a schema-valid-but-semantically-wrong example for the CineBot BookingRequest schema."
 
-**Q23. Design a Union-typed schema extension to CineBot supporting FIVE distinct intents (book, cancel, modify, check-status, refund), and explain what change (if any) is needed to the agent's configuration versus the two-intent version shown in this session.**
+**Q23.**
+
+**Question:** Design a Union-typed schema extension to CineBot supporting FIVE distinct intents (book, cancel, modify, check-status, refund), and explain what change (if any) is needed to the agent's configuration versus the two-intent version shown in this session.
+
 **Answer:** Define five distinct Pydantic `BaseModel` classes, one per intent, each capturing the fields genuinely relevant to that specific action (e.g., a `ModifyBooking` model might need an `original_booking_id` plus the fields being changed; a `RefundRequest` might need a `booking_id` and a `reason`). The only required change to the agent's configuration is expanding the `Union` type to include all five: `Union[NewBooking, CancelBooking, ModifyBooking, CheckStatus, RefundRequest]`, passed to `ToolStrategy(schema=...)` exactly as with two schemas — the mechanism itself is not limited to two options, and no other agent-level configuration change is needed; the model's own contextual understanding is relied upon to correctly select among all five based on the message's actual intent, exactly as demonstrated with two.
+
 **Explanation:** Requires extending the session's exact demonstrated pattern to a larger, more realistic intent set, confirming the mechanism genuinely scales without additional architectural changes.
+
 **Why Interviewers Ask This:** Tests the ability to extend a taught pattern confidently to a more complex, realistic scenario.
+
 **Possible Follow-up:** "At what number of possible intents might you start to worry about the model's classification accuracy degrading, and how would you validate that concern?"
 
-**Q24. The session shows that `handle_errors` with a custom string is set globally per `ToolStrategy` configuration. Design an approach for providing FIELD-SPECIFIC custom error messages (e.g., a different message for a `ticket_count` violation versus a `customer_name` violation) within a single schema.**
+**Q24.**
+
+**Question:** The session shows that `handle_errors` with a custom string is set globally per `ToolStrategy` configuration. Design an approach for providing FIELD-SPECIFIC custom error messages (e.g., a different message for a `ticket_count` violation versus a `customer_name` violation) within a single schema.
+
 **Answer:** Since `handle_errors` as demonstrated operates at the strategy level (applying one custom message across any validation failure for that schema), field-specific messaging requires moving the precision into the **Pydantic schema itself** rather than relying on `ToolStrategy`'s single string: use Pydantic's own field-level or model-level validators (`field_validator`/`model_validator`, covered in an earlier session) to raise a `ValueError` with a field-specific, precise message when a given field's constraint is violated — since LangChain's automatic error-propagation mechanism (Section 8) forwards whatever validation error Pydantic actually raises, a well-crafted, field-specific `ValueError` message from a custom validator would be exactly as automatically retried and fed back to the model as the generic `le=10` constraint violation was, but with the field-specific precision built directly into the schema rather than a single global override string.
+
 **Explanation:** Requires synthesizing this session's `handle_errors` mechanism with the earlier Pydantic `field_validator` session to design a more granular solution than either topic alone provides — genuine cross-session synthesis.
+
 **Why Interviewers Ask This:** A senior-level design question testing whether a candidate can combine multiple previously-taught mechanisms into a novel, more precise solution.
+
 **Possible Follow-up:** "Would this approach still work correctly if you also set a global handle_errors custom string alongside these field-level validators? What would take precedence?"
 
-**Q25. Synthesize Sections 6 (raw model vs. agent) and 8 (automatic retry) to explain precisely at what point in an agent's execution the validation-retry loop actually occurs, and why it could NOT occur at the raw-model level demonstrated in Section 6.**
+**Q25.**
+
+**Question:** Synthesize Sections 6 (raw model vs. agent) and 8 (automatic retry) to explain precisely at what point in an agent's execution the validation-retry loop actually occurs, and why it could NOT occur at the raw-model level demonstrated in Section 6.
+
 **Answer:** The validation-retry loop demonstrated in Section 8 is only possible because it's occurring **inside an agent's orchestrated loop** (via `create_agent`), not at the raw single-call model level shown failing in Section 6 — the retry mechanism requires exactly the "call model → inspect result → decide what to do next → call model again" looping capability that Section 6 explicitly proved a raw, tool-and-structured-output-bound model does NOT have on its own. In other words, `ToolStrategy`'s automatic retry-on-validation-failure isn't a separate, independent LangChain feature bolted onto a raw model call — it is a specific, concrete instance of the same underlying orchestration loop (detect a problem, take a corrective action, call the model again) that agents provide generally, applied here specifically to structured-output validation failures rather than to explicit tool-call requests. This directly explains why the retry behavior in Section 8 was demonstrated using `create_agent`-based examples (like the `seat_agent`), not the raw `incomplete_model` from Section 6 — the raw model literally could not perform this retry on its own, for exactly the same structural reason it couldn't chain a tool call and a structured response together.
+
 **Explanation:** Requires connecting two sections that are taught somewhat separately in the transcript into a single, coherent architectural insight — genuine, non-obvious synthesis.
+
 **Why Interviewers Ask This:** A capstone-level systems question testing whether a candidate sees the underlying unity between seemingly distinct features (multi-step tool orchestration and automatic validation retry) rather than treating them as unrelated capabilities.
+
 **Possible Follow-up:** "If you called `model.with_structured_output(Schema, strategy=ToolStrategy(...))` directly on a raw model (not wrapped in create_agent), would the automatic retry still work? Why or why not, based on this reasoning?"
 
 ---
