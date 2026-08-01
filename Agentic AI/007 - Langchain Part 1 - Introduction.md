@@ -1,6 +1,6 @@
 # 🦜 LangChain from First Principles: From Hand-Built Agents to create_agent()
 
-- <i>**Session:** Day 7 — Class 6: "LangChain Part 1" · 
+- <i>**Session:** Day 7 — Class 6: "LangChain - Introduction" · 
 - **Instructor:** Mayank Aggarwal
 - **Note on scope:** This class has two halves. The **first half** completes the pure-Python, framework-free agent series from the previous session — reviewing files 1–5 (AI model → chatbot → agent, provider compatibility, structured output, single/multi-tool calling) and then live-building **Project 6** (a full conversational "mini-Claude" with a real agentic loop, wrapped in a Streamlit UI) and **Project 7** (a multi-tool agent using a real currency API). The **second half** finally introduces **LangChain** itself — but only after the instructor is confident the class can recognize, underneath LangChain's `create_agent()`, the exact same brain/memory/tools loop they just built by hand. Deep LangChain coverage (memory, checkpointers, streaming, multi-agent patterns) is explicitly deferred to the next class — this guide reflects that honestly.</i>
 

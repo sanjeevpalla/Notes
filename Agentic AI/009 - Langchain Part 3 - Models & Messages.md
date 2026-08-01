@@ -1,6 +1,6 @@
 # 🦜 LangChain Models & Messages Deep Dive: Streaming, Tool Binding & Structured Output
 
-- <i>**Session:** Day 9 — Class 8: "LangChain Part 3" · 
+- <i>**Session:** Day 9 — Class 8: "Models & Messages" · 
 - **Instructor:** Mayank Aggarwal
 - **Note on scope:** Despite the session title referencing a "POC & Mini Project," this class is entirely a **deep, code-heavy continuation of the Models and Messages sections** from the prior session — covering model configuration parameters, the three ways to call a model (`invoke`, `stream`, `batch`), tool binding internals, a first look at structured output, and an exhaustive breakdown of every LangChain message type (system, human, AI, tool). The "project" content in this session is a **live preview/walkthrough** of two real, already-built client projects (a fraud-detection LangGraph system and a GCP-deployed procurement multi-agent system) shown to set expectations for course depth — **no project code is built live in this session**. This guide reflects that honestly rather than inventing a POC build that didn't happen here.</i>
 

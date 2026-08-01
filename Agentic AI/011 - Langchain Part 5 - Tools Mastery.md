@@ -1,6 +1,6 @@
 # 🛠 Tools Mastery: Runtime, Reserved Arguments, Dynamic Loading & return_direct
 
-- <i>**Session:** Day 11 — Class 10: "LangChain-5" · 
+- <i>**Session:** Day 11 — Class 10: "Tools Mastery" · 
 - **Instructor:** Mayank Aggarwal
 - **Note on scope:** Just like the previous session, this class opens by announcing "tools and agents" as the day's plan — but ends up being an **exhaustive, single-topic deep dive into Tools**, taught live through CineBot. Agents (and Middleware) are explicitly deferred to the next session, with only brief closing references. This guide reflects that honestly: it covers the `@tool` decorator, argument schemas, reserved argument names, server-side vs. local tools, pre-built tools, the powerful `ToolRuntime` object (state/context/store/stream), `return_direct`, and dynamic tool loading — everything actually taught — without inventing Agents content that wasn't delivered here.</i>
 

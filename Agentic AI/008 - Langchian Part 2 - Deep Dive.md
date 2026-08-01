@@ -1,6 +1,6 @@
 # 🦜 LangChain Concepts Deep Dive: The Lang Family, Harness Engineering & Models In-Depth
 
-- <i>**Session:** Day 8 — Class 7: "LangChain Part 2" · 
+- <i>**Session:** Day 8 — Class 7: "LangChain Deep Dive" · 
 - **Instructor:** Mayank Aggarwal
 - **Note on scope:** This session deliberately slows down and goes *conceptual* before going deeper into code. It covers the full "Lang family" product landscape (LangChain, LangGraph, DeepAgents, LangSmith), the "harness engineering" mental model, LangChain's historical version timeline, a from-scratch project environment setup, and then a genuinely deep dive into the **Models** component of an agent — including a full free-vs-paid and open-vs-closed-source breakdown, and an extended live walkthrough of OpenRouter. The instructor explicitly states he only reached "messages and models" by the end of class — tools, memory, structured output, and middleware are deliberately deferred to the next session. This guide reflects that honestly.</i>
 

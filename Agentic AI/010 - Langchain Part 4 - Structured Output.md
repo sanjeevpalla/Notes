@@ -1,6 +1,6 @@
 # 🎬 Structured Output Mastery via CineBot: Provider Strategy, Tool Strategy & Automatic Error Recovery
 
-- <i>**Session:** Day 10 — Class 9: "LangChain Part 4" · 
+- <i>**Session:** Day 10 — Class 9: "Structured Output" · 
 - **Instructor:** Mayank Aggarwal
 - **Note on scope:** Although the session opens by announcing "agents, tools, and structured output" as the day's plan, this class ends up being an **exhaustive, single-topic deep dive into Structured Output** — taught entirely through a live-built "CineBot" movie-ticket-booking assistant. Tools and Agents are explicitly deferred to the next session ("tomorrow"), with only a brief closing preview of their eventual depth. This guide reflects that honestly: it covers structured output in the full depth actually taught (provider strategy, tool strategy, union/multi-schema support, automatic validation-error retries, and the `handle_errors` parameter), without inventing Tools/Agents content that wasn't delivered here.</i>
 
