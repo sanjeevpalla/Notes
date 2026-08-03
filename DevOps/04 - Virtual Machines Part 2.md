@@ -812,3 +812,9 @@ cloud_automation_report/
 - This session is explicitly **hands-on** for manual creation, but conceptual-only for automation -- actual scripting/CLI demonstrations and logging into the created VM via terminal are both **explicitly deferred to the next class**.
 - Terraform is deliberately, explicitly NOT deep-dived here -- a full, dedicated "Terraform Zero to Hero" class is coming later in the course.
 - The instructor's stated personal opinion on Azure's UI/UX ("slightly better" than AWS) is explicitly presented as opinion, not objective fact -- worth remembering as a labeled distinction.
+
+---
+
+## 🔗 Source
+
+- [AWS & Azure - How to Create Virtual Machines](https://youtu.be/NJkMe9cdYEQ?si=89FE5xURta5tRLRl)

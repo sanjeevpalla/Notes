@@ -1422,5 +1422,5 @@ client.create_collection(collection_name=..., vectors_config=VectorParams(size=d
 
 ---
 
-## Source
+## 🔗 Source
 - [Build Enterprise-Grade RAG Applications](https://www.youtube.com/live/bjkjaqUZl4E?si=McQ_r3uZNHCPVlfA)

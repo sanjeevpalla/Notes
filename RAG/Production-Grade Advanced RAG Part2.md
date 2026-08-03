@@ -1117,5 +1117,5 @@ portkey_client.chat.completions.create(model="slug/model-name", messages=[...])
 
 ---
 
-## Source
+## 🔗 Source
 - [Building Multi-Modal Intelligence Systems: Document Processing Production RAG](https://www.youtube.com/live/jOgqWdck7BU?si=OupUT5Jj8bP6TybX)

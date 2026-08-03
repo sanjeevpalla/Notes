@@ -638,3 +638,9 @@ devops_interview_pack/
 - This session's stated fourth topic ("day-to-day activities as a DevOps engineer") was **not** delivered as its own distinct section — it was only implicitly folded into the roles/responsibilities portion of the self-introduction guidance (Section 5). Treat this as a real gap in this specific session, likely addressed more fully in a later day of the course, not as content to assume was fully covered here.
 - This is **Day 1 of a 40-day course** — deliberately, explicitly simplified, with more advanced concepts (cloud-native, serverless, shift-left) named but intentionally deferred to later sessions.
 - Day 2 (the next session in this series) is stated to cover the Software Development Life Cycle (SDLC) and DevOps's specific role within it, plus a recap of this Day 1 content.
+
+---
+
+## 🔗 Source
+
+- [Fundamentals of DevOps](https://youtu.be/Ou9j73aWgyE?si=5QdgQO158XnxsmJI)

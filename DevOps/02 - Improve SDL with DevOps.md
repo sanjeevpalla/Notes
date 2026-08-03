@@ -724,3 +724,9 @@ sdlc_walkthrough/
 - Project management methodologies (Waterfall, Iterative, Agile) are explicitly, deliberately covered only briefly here — genuine depth is deferred to a separate, dedicated future class, not this SDLC-focused session.
 - Git and source code repositories are named but explicitly deferred to a future, dedicated session for deeper coverage.
 - This session builds directly on Day 1's "why DevOps evolved" historical narrative — the modern SDLC phase-ownership model (especially DevOps's absorption of what used to be System Administrator and Build & Release Engineer work) is best understood as a continuation of that same story, not a separate, unrelated topic.
+
+---
+
+## 🔗 Source
+
+- [Improve SDL with DevOps](https://youtu.be/jRqBIpcgO4g?si=8utce8hjry4VVYhA)

@@ -850,3 +850,9 @@ free -g / nproc / df -h / top
 - This session is explicitly, deliberately **breadth-first** -- deep kernel/architecture coverage and deep shell-scripting instruction are both intentionally out of scope here, with dedicated resources pointed to instead (three separate videos on the instructor's channel).
 - A **real-time DevOps shell scripting project** is explicitly previewed for the next class -- this session's commands are the foundation for that upcoming, more applied content.
 - The session's own teaching choices (using bash specifically, using the real EC2 instance from Day 5) are themselves direct applications of the course's stated breadth-first, hands-on philosophy -- not arbitrary decisions.
+
+---
+
+## 🔗 Source
+
+- [Linux & Shell Scripting](https://youtu.be/9jw9F6mcQDo?si=UaUi9afPY6uflulR)

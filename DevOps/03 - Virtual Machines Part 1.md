@@ -722,3 +722,9 @@ virtualization_audit/
 - This session is **explicitly theory-only** — actually creating a VM (via AWS console or automation/scripts) is deliberately deferred to the next session ("Part 2" / "tomorrow's class"), not covered here.
 - The land/rental analogy (Section 1) and the `example.com` server scenario (Section 2-3) are the same underlying efficiency argument, told twice at increasing levels of technical precision — useful to remember both, since interviewers may probe either framing.
 - This session's efficiency argument (virtualization benefits are proportional to underutilization) is a genuine nuance worth retaining — not every workload benefits equally from virtualization, a distinction this guide's Advanced Interview Questions explore in depth.
+
+---
+
+## 🔗 Source
+
+- [Virtual Machines](https://youtu.be/lgUwYwBozow?si=tASx17JoYpzzJQrn)

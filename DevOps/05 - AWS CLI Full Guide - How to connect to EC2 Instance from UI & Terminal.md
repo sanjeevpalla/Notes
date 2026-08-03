@@ -860,3 +860,9 @@ aws s3 mb s3://bucket-name
 - This session is the **direct, promised follow-through** on Day 4's two deferred items (terminal login, automation demo) -- treat Days 3, 4, and 5 as one continuous arc.
 - CFT and `boto3` are covered here only at a "what it is and roughly how it works" level -- genuine hands-on depth for both is explicitly reserved for a future, dedicated Infrastructure as Code unit.
 - The session's own stated assignment (install AWS CLI, authenticate, run real commands) is a genuine, required practice step -- not optional supplementary content.
+
+---
+
+## 🔗 Source
+
+- [AWS CLI Full Guide - How to connect to EC2 Instance from UI & Terminal](https://youtu.be/cN4pt5KQ9eA?si=13PMxec4ZrCv6O75)
