@@ -1114,3 +1114,8 @@ portkey_client.chat.completions.create(model="slug/model-name", messages=[...])
 - This guide covers the **guardrails and gateway implementation, plus the opening framing of evaluation** — the detailed evaluation metrics, multimodal document processing (OCR, layout detection, ColPali-style systems), and full AWS/Docker deployment architecture are all explicitly **continued later in this same 8-hour session**, not covered in depth here.
 - This is a **second, separate 8-hour marathon** continuing the same Kubernetes RAG project from a prior week's session — not literally "Part 2" of the same single recording.
 - The instructors' repeated, self-aware framing ("we deliberately chose Nemo to show you its limitation") reflects a consistent teaching philosophy across this entire course series: felt, demonstrated limitations over abstractly-stated ones.
+
+---
+
+## Source
+- [Building Multi-Modal Intelligence Systems: Document Processing Production RAG](https://www.youtube.com/live/jOgqWdck7BU?si=OupUT5Jj8bP6TybX)

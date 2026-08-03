@@ -1419,3 +1419,8 @@ client.create_collection(collection_name=..., vectors_config=VectorParams(size=d
 - This guide covers **Part 1 of a multi-part live marathon** — full agentic implementation (planner/retriever/responder graph), guardrails (Nemo), gateway (Portkey) implementation, memory, evaluation, and cloud deployment (AWS, CI/CD) are all **explicitly continued in later parts**, not covered in depth here.
 - The project deliberately uses **cheap, open-source/average tools locally** (Gemini + sentence-transformers, Flash Rank) and **upgrades to production-grade tools in cloud deployment** (Jina embeddings, Jina reranker) — a real, stated "prototype cheaply, then upgrade" philosophy.
 - The "noisy data" design (90% irrelevant, 10% relevant) is a deliberate simulation of realistic enterprise data conditions, not an accidental or careless dataset choice.
+
+---
+
+## Source
+- [Build Enterprise-Grade RAG Applications](https://www.youtube.com/live/bjkjaqUZl4E?si=McQ_r3uZNHCPVlfA)
