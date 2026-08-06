@@ -1,6 +1,6 @@
 # 🚀 CI/CD Workflow: Promoting an Application from Dev to Staging to Production
 
-- <i>**Session:** Standalone Conceptual/Interview-Prep Video — "CI/CD Workflow from Dev to Stage to Prod Environments: Complete CI/CD Process" · 
+- <i>**Session:** Standalone Conceptual/Interview-Prep Video — "CI/CD Workflow from Dev to Stage to Prod Environments: Complete CI/CD Process"· 
 - **Instructor:** Abhishek
 - **Note on scope:** This is a **standalone conceptual video**, distinct from the numbered "Day X" course, though it directly builds on and explicitly cites Day 10's branching-strategy session. The instructor is explicit about this video's genuinely NEW contribution: all prior CI/CD content on this channel (Jenkins, GitHub Actions, GitLab, AWS CodePipeline) taught how to build a pipeline for ONE environment — this video specifically addresses the higher-level question of how an application's code moves across MULTIPLE environments (feature/dev → staging → pre-production/UAT → production), governed by a coordinated branching strategy.</i>
 
