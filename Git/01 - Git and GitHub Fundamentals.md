@@ -1,6 +1,6 @@
 # 🌿 Git & GitHub Fundamentals: Version Control, the Core Lifecycle & Why Distributed Wins
 
-- <i>**Session:** DevOps Zero to Hero — Day 9: "Git and GitHub" · 
+- <i>**Session:** "Git and GitHub" · 
 - **Instructor:** Abhishek
 - **Note on scope:** This session introduces version control conceptually (the two core problems it solves), the classic centralized-vs-distributed interview question, precisely distinguishes Git from GitHub, and walks through the essential Git lifecycle commands live (`init`, `add`, `status`, `diff`, `commit`, `log`, `reset --hard`) before creating and sharing a real GitHub repository. A **deeper GitHub-specific dive** (organizations, issues, pull requests, CI/CD, project management, security features) and **additional Git commands/interview questions** are both explicitly deferred to future sessions — reflected honestly here.</i>
 

@@ -1,6 +1,6 @@
 # ⚡ Git Commands & Interview Q&A: The Complete Daily Workflow, Live-Demonstrated
 
-- <i>**Session:** DevOps Zero to Hero — Day 11: "Git Interview Q&A and Commands" · 
+- <i>**Session:** "Git Interview Q&A and Commands" · 
 - **Instructor:** Abhishek
 - **Note on scope:** This session delivers on the "additional Git commands and dedicated interview-questions treatment" explicitly promised at the end of Day 9. Every command is demonstrated live, on a real terminal, including real, unedited moments — a `git push` that silently does nothing because no remote is configured, and a genuine merge conflict hit live and resolved on screen. The instructor also points to a separate, previously-published "18 to 20 Git interview questions" video for additional coverage beyond what's directly demonstrated here.</i>
 

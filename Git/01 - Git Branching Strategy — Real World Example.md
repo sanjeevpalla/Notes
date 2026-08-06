@@ -1,6 +1,6 @@
 # 🌳 Git Branching Strategy: Master, Feature, Release & Hotfix Branches, Proven on Kubernetes
 
-- <i>**Session:** DevOps Zero to Hero — Day 10: "Git Branching Strategy — Real World Example" · 
+- <i>**Session:** "Git Branching Strategy — Real World Example" · 
 - **Instructor:** Abhishek
 - **Note on scope:** This session covers Git branching strategy both theoretically (via worked calculator and Uber examples) and practically — live, on the real, public `kubernetes/kubernetes` GitHub repository, chosen specifically for its scale (~3,300 contributors). It is explicitly framed around one of the most commonly asked DevOps interview topics, with each branch type's definition repeatedly flagged as a direct, ready-to-use interview answer.</i>
 
