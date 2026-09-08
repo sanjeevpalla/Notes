@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MCP Lifecycle — Conversation Simulator</title>
+<style>
+  :root {
+    --amber: #b5651d; --amber-bg: #fdf3e7; --amber-bd: #e8c9a0;
+    --teal: #0f6b64; --teal-bg: #e8f5f3; --teal-bd: #a9d8d1;
+    --lav: #5b4b8a; --lav-bg: #f1eefa; --lav-bd: #cfc3e8;
+    --ink: #22262b; --sub: #6b7280; --line: #e5e7eb; --bg: #fafaf8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .mono { font-family: 'SF Mono', Consolas, Menlo, monospace; }
+  header {
+    padding: 28px 32px 18px; border-bottom: 2px solid var(--ink);
+  }
+  header h1 { margin: 0 0 4px; font-size: 26px; letter-spacing: -0.3px; }
+  header p { margin: 0; color: var(--sub); font-family: -apple-system, sans-serif; font-size: 14px; }
+
+  .layout { display: grid; grid-template-columns: 1fr 340px; gap: 0; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  .stage { padding: 24px 32px; }
+
+  .controls { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; font-family: -apple-system, sans-serif; }
+  button {
+    font-family: -apple-system, sans-serif; font-size: 13px; font-weight: 600;
+    padding: 9px 16px; border-radius: 3px; border: 1.5px solid var(--ink);
+    background: var(--ink); color: #fff; cursor: pointer;
+  }
+  button.secondary { background: #fff; color: var(--ink); }
+  button:disabled { opacity: 0.35; cursor: default; }
+  .phase-badge {
+    font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 4px 10px; border-radius: 999px; border: 1.5px solid;
+  }
+  .phase-init { color: var(--amber); background: var(--amber-bg); border-color: var(--amber-bd); }
+  .phase-operation { color: var(--teal); background: var(--teal-bg); border-color: var(--teal-bd); }
+  .phase-shutdown { color: var(--lav); background: var(--lav-bg); border-color: var(--lav-bd); }
+
+  .rails { display: flex; justify-content: space-between; font-family: -apple-system, sans-serif;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--sub); border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 14px; }
+
+  .log { display: flex; flex-direction: column; gap: 10px; min-height: 420px; }
+  .msg {
+    max-width: 78%; opacity: 0; transform: translateY(6px);
+    animation: in 0.35s ease forwards;
+    border-radius: 4px; border: 1.5px solid; padding: 10px 14px; cursor: pointer;
+  }
+  @keyframes in { to { opacity: 1; transform: translateY(0); } }
+  .msg.client { align-self: flex-start; background: var(--amber-bg); border-color: var(--amber-bd); }
+  .msg.server { align-self: flex-end; background: var(--teal-bg); border-color: var(--teal-bd); }
+  .msg.event { align-self: center; background: var(--lav-bg); border-color: var(--lav-bd); font-style: italic; }
+  .msg .lbl { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.4px; margin-bottom: 3px; }
+  .msg.client .lbl { color: var(--amber); }
+  .msg.server .lbl { color: var(--teal); }
+  .msg.event .lbl { color: var(--lav); }
+  .msg .caption { font-family: -apple-system, sans-serif; font-size: 14px; }
+  .msg pre { display: none; margin: 8px 0 0; font-size: 12px; background: rgba(255,255,255,0.6);
+    padding: 8px; border-radius: 3px; overflow-x: auto; white-space: pre-wrap; }
+  .msg.expanded pre { display: block; }
+  .msg .hint { font-family: -apple-system, sans-serif; font-size: 11px; color: var(--sub); margin-top: 4px; }
+
+  .side { border-left: 2px solid var(--ink); padding: 24px 20px; font-family: -apple-system, sans-serif; }
+  .side h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px; }
+  details { border: 1px solid var(--line); border-radius: 4px; margin-bottom: 8px; background: #fff; }
+  summary { padding: 10px 12px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  details[open] summary { border-bottom: 1px solid var(--line); }
+  .panel { padding: 10px 12px; font-size: 12.5px; line-height: 1.6; }
+  .panel table { width: 100%; border-collapse: collapse; }
+  .panel td, .panel th { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .panel th { font-size: 11px; text-transform: uppercase; color: var(--sub); }
+  .tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 700; }
+  .tag.amber { background: var(--amber-bg); color: var(--amber); }
+  .tag.teal { background: var(--teal-bg); color: var(--teal); }
+  code { background: #f0f0ee; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+  a { color: var(--teal); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>MCP Lifecycle — Conversation Simulator</h1>
+  <p>Not a slide deck — press Play and watch the full protocol conversation happen, message by message. (This shows complete message bodies, the way Part 3's wiretap captures them — Claude Desktop's own log only shows a one-line summary of each message; see "Live capture command" for that exact, corrected command.)</p>
+</header>
+
+<div class="layout">
+  <div class="stage">
+    <div class="controls">
+      <button id="playBtn" onclick="togglePlay()">▶ Play</button>
+      <button class="secondary" onclick="stepOnce()">Step →</button>
+      <button class="secondary" onclick="reset()">⟲ Reset</button>
+      <span id="phaseBadge" class="phase-badge phase-init">Initialization</span>
+    </div>
+    <div class="rails"><span>Client</span><span>Server</span></div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="side">
+    <h2>Deep Reference</h2>
+
+    <details>
+      <summary>Capability table</summary>
+      <div class="panel">
+        <table>
+          <tr><th>Side</th><th>Capability</th><th>Meaning</th></tr>
+          <tr><td class="tag amber">Client</td><td>roots</td><td>Filesystem directory access for the server</td></tr>
+          <tr><td class="tag amber">Client</td><td>sampling</td><td>Server can borrow the client's own AI model</td></tr>
+          <tr><td class="tag teal">Server</td><td>tools</td><td>Callable actions</td></tr>
+          <tr><td class="tag teal">Server</td><td>resources</td><td>Read-only data</td></tr>
+          <tr><td class="tag teal">Server</td><td>prompts</td><td>Request templates</td></tr>
+          <tr><td class="tag teal">Server</td><td>logging</td><td>Structured log messages to the client</td></tr>
+        </table>
+        <p style="margin-top:8px;color:#b5651d"><em>roots, sampling, and logging are being deprecated in the newest spec revision (SEP-2577).</em></p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Error codes</summary>
+      <div class="panel">
+        <table>
+          <tr><th>Code</th><th>Name</th><th>Cause</th></tr>
+          <tr><td>-32700</td><td>Parse error</td><td>Unreadable JSON</td></tr>
+          <tr><td>-32600</td><td>Invalid request</td><td>Well-formed, not valid</td></tr>
+          <tr><td>-32601</td><td>Method not found</td><td>Never advertised</td></tr>
+          <tr><td>-32602</td><td>Invalid params</td><td>Wrong/missing args</td></tr>
+          <tr><td>-32603</td><td>Internal error</td><td>Server logic failed</td></tr>
+          <tr><td>-32000+</td><td>Server-defined</td><td>Custom to that server</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary>Transport comparison</summary>
+      <div class="panel">
+        <p><span class="tag teal">stdio</span> subprocess, stdin/stdout, newline-delimited, stderr free for logging, no auth layer.</p>
+        <p><span class="tag amber">Streamable HTTP</span> one endpoint (<code>/mcp</code>), POST+GET, JSON or SSE, optional <code>Mcp-Session-Id</code>.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Real local servers (stdio)</summary>
+      <div class="panel">
+        <p><code>npx -y @modelcontextprotocol/server-filesystem &lt;dir&gt;</code></p>
+        <p><code>npx -y @modelcontextprotocol/server-everything</code> — all 3 primitives</p>
+        <p><code>uvx mcp-server-git</code></p>
+        <p><code>npx -y @modelcontextprotocol/server-memory</code></p>
+        <p><code>uvx mcp-server-fetch</code></p>
+        <p><code>uvx mcp-server-time</code></p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Real remote servers (HTTP)</summary>
+      <div class="panel">
+        <p><strong>DeepWiki</strong> (free, no auth)<br>
+        <code>https://mcp.deepwiki.com/mcp</code><br>
+        <span style="color:#6b7280">also: /sse (legacy, same service — great for A/B transport demos)</span></p>
+        <p><strong>Semgrep</strong><br><code>https://mcp.semgrep.ai/mcp</code></p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Live capture command</summary>
+      <div class="panel">
+        <p style="font-size:11px;color:#b5651d">Correction: Claude Desktop's log only shows a summary line (method/id/params-or-result present), not full JSON — no jq needed.</p>
+        <p class="mono" style="font-size:11px;">tail -n0 -f "$HOME/Library/Logs/Claude"/mcp-server-*.log<br>| awk '/Message from client:/ {...}<br>&nbsp;&nbsp;/Message from server:/ {...}'</p>
+        <p>Full corrected script: <code>watch-mcp-logs.sh</code>, in the course files.</p>
+      </div>
+    </details>
+  </div>
+</div>
+
+<script>
+const STEPS = [
+  {phase:'init', dir:'client', label:'Step 1 · initialize request', caption:'Client speaks first: version, capabilities, identity.',
+   json:{jsonrpc:"2.0", id:1, method:"initialize", params:{protocolVersion:"2025-11-25", capabilities:{roots:{listChanged:true}}, clientInfo:{name:"RecipeBoxDesktopClient", version:"1.0.0"}}}},
+  {phase:'init', dir:'server', label:'Step 2 · initialize response', caption:'Server answers with its own version, capabilities, identity.',
+   json:{jsonrpc:"2.0", id:1, result:{protocolVersion:"2025-11-25", capabilities:{tools:{listChanged:true}}, serverInfo:{name:"RecipeBox", version:"1.0.0"}}}},
+  {phase:'init', dir:'client', label:'Step 3 · initialized notification', caption:'No id — an announcement, not a question. Handshake sealed.',
+   json:{jsonrpc:"2.0", method:"notifications/initialized"}},
+  {phase:'operation', dir:'client', label:'Discovery · tools/list', caption:'Fires automatically the instant the handshake completes.',
+   json:{jsonrpc:"2.0", id:2, method:"tools/list"}},
+  {phase:'operation', dir:'server', label:'Discovery response', caption:'The host quietly stores this for later matching.',
+   json:{jsonrpc:"2.0", id:2, result:{tools:[{name:"list_recipes",description:"List every recipe"},{name:"get_recipe",description:"Get one recipe's detail"},{name:"search_recipes",description:"Search by tag"}]}}},
+  {phase:'operation', dir:'client', label:'tools/call · search_recipes', caption:'A real question finally arrives.',
+   json:{jsonrpc:"2.0", id:3, method:"tools/call", params:{name:"search_recipes", arguments:{tag:"quick"}}}},
+  {phase:'operation', dir:'server', label:'Tool call response', caption:'Placing the order, after reading the menu.',
+   json:{jsonrpc:"2.0", id:3, result:{content:[{type:"text", text:"Weeknight Pasta, Five-Minute Salsa"}]}}},
+  {phase:'operation', dir:'client', label:'A request for something never negotiated', caption:'The host asks for prompts anyway — this genuinely happens.',
+   json:{jsonrpc:"2.0", id:4, method:"prompts/list"}},
+  {phase:'operation', dir:'server', label:'Error · Method not found', caption:'Not a crash — just an honest "we don\'t have that."',
+   json:{jsonrpc:"2.0", id:4, error:{code:-32601, message:"Method not found"}}},
+  {phase:'operation', dir:'client', label:'A long-running call, tagged for progress', caption:'A progressToken lets the server report back mid-task.',
+   json:{jsonrpc:"2.0", id:7, method:"tools/call", params:{name:"search_recipes", arguments:{tag:"sunday"}, _meta:{progressToken:"tok-7"}}}},
+  {phase:'operation', dir:'server', label:'notifications/progress', caption:'No id — a status update, not a reply yet.',
+   json:{jsonrpc:"2.0", method:"notifications/progress", params:{progressToken:"tok-7", progress:60, total:100, message:"Searching 60 of 100 recipes"}}},
+  {phase:'operation', dir:'client', label:'notifications/cancelled', caption:'A decision already made, announced — not a request for permission.',
+   json:{jsonrpc:"2.0", method:"notifications/cancelled", params:{requestId:"7", reason:"Timeout exceeded (30s)"}}},
+  {phase:'operation', dir:'client', label:'ping', caption:'Carries no information at all — just proving the line is still open.',
+   json:{jsonrpc:"2.0", id:42, method:"ping"}},
+  {phase:'operation', dir:'server', label:'ping response', caption:'An empty result is the entire point.',
+   json:{jsonrpc:"2.0", id:42, result:{}}},
+  {phase:'shutdown', dir:'event', label:'EVENT — not a JSON-RPC message', caption:'Shutdown has no message format of its own. The transport closing IS the goodbye.',
+   json:null, raw:'Server transport closed { metadata: undefined }'},
+];
+
+let idx = 0, playing = false, timer = null;
+const log = document.getElementById('log');
+const badge = document.getElementById('phaseBadge');
+const playBtn = document.getElementById('playBtn');
+
+function phaseClass(p){ return {init:'phase-init', operation:'phase-operation', shutdown:'phase-shutdown'}[p]; }
+function phaseLabel(p){ return {init:'Initialization', operation:'Operation', shutdown:'Shutdown'}[p]; }
+
+function render(step){
+  const el = document.createElement('div');
+  el.className = 'msg ' + step.dir;
+  const dirLabel = step.dir === 'client' ? 'Client → Server' : step.dir === 'server' ? 'Server → Client' : 'Event';
+  el.innerHTML = `<div class="lbl">${dirLabel} · ${step.label}</div>
+    <div class="caption">${step.caption}</div>
+    <div class="hint">click to ${step.json || step.raw ? 'toggle JSON' : ''}</div>
+    <pre class="mono">${step.json ? JSON.stringify(step.json, null, 2) : (step.raw || '')}</pre>`;
+  el.onclick = () => el.classList.toggle('expanded');
+  log.appendChild(el);
+  badge.className = 'phase-badge ' + phaseClass(step.phase);
+  badge.textContent = phaseLabel(step.phase);
+  el.scrollIntoView({behavior:'smooth', block:'end'});
+}
+
+function stepOnce(){
+  if (idx >= STEPS.length) { pause(); return; }
+  render(STEPS[idx]);
+  idx++;
+  if (idx >= STEPS.length) pause();
+}
+function togglePlay(){ playing ? pause() : play(); }
+function play(){
+  playing = true; playBtn.textContent = '⏸ Pause';
+  timer = setInterval(stepOnce, 1400);
+}
+function pause(){
+  playing = false; playBtn.textContent = '▶ Play';
+  clearInterval(timer);
+}
+function reset(){
+  pause(); idx = 0; log.innerHTML = '';
+  badge.className = 'phase-badge phase-init'; badge.textContent = 'Initialization';
+}
+</script>
+</body>
+</html>
