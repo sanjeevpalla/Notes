@@ -23,6 +23,7 @@
 | 🌐 [Networking](<Networking/README.md>) | Networking fundamentals (IP, subnets, CIDR, ports) and the OSI model |
 | 🔍 [RAG](<RAG/README.md>) | RAG fundamentals, vectorless RAG, a production-grade RAG build, and an end-to-end HR Policy assistant project |
 | 🐚 [Shell Scripting](<Shell Scripting/README.md>) | Shell Scripting Zero to Hero — fundamentals through real DevOps scripting practices |
+| 🏗 [Software Architecture & Design](<Software Architecture & Design/README.md>) | Requirements, quality attributes, building blocks, databases, architectural patterns, stream/big-data processing, and two end-to-end system designs |
 | 📊 [Statistics](<Statistics/README.md>) | Statistics for Data Science — from foundations to hypothesis testing, correlation, and distributions |
 
 ---
