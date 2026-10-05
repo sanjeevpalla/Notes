@@ -1,4 +1,4 @@
-# 🔌 MCP Deep Dive, Part 6 — The New LangChain MCP Module, End to End, & a Second Pass on Multi-Agent Patterns
+# 🔌 MCP Deep Dive — The New LangChain MCP Module, End to End, & a Second Pass on Multi-Agent Patterns
 
 - <i>**Series:** MCP Deep Dive (Agentic AI with LangChain course, batch "Agent Tki") — Part 6. Despite this session's filename ("LangChain GCP Project"), **no GCP project was actually built in this class** — it turned out to be a full completion of the LangChain MCP adapter material from Part 5, plus a second, deeper pass on multi-agent patterns. The actual GCP build was explicitly pushed to the next class(es) ·
 - **Instructor:** Mayank Aggarwal
