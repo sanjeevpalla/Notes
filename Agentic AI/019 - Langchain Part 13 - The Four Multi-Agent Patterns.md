@@ -1,6 +1,6 @@
-# 🧩 MCP & Agentic LangChain, Part 7 — The Four Multi-Agent Patterns, End to End, & the Meridian AI Project Overview
+# 🧩 MCP & Agentic LangChain — The Four Multi-Agent Patterns, End to End, & the Meridian AI Project Overview
 
-*Series: MCP Deep Dive / Agentic AI with LangChain (Batch "Agent Tki") — Part 7*
+*Series: MCP Deep Dive / Agentic AI with LangChain (Batch "Agent Tki")*
 *Instructor: Mayank*
 *Source: 4 Oct class ("Langchain GCP Project")*
 
