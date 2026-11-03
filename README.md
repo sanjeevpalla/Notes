@@ -10,6 +10,7 @@
 | 🤖 [Agentic AI](<Agentic AI/>) | Agentic AI fundamentals, Python for agents, Pydantic, and a full LangChain deep dive (models, tools, structured output, agents, middleware, HITL) |
 | 🔄 [CI CD](<CI CD/README.md>) | CI/CD fundamentals, multi-environment workflows, GitHub Actions, and GitLab pipelines |
 | 🧠 [Deep Learning](<Deep Learning/README.md>) | Perceptron through CNNs, RNNs/LSTMs, Word2Vec, and Transformers |
+| 🧩 [Design Patterns](<Design Patterns/README.md>) | SOLID principles and all 23 Gang of Four patterns in Python — creational, structural, and behavioral, plus a capstone summary |
 | ⚙️ [DevOps](<DevOps/README.md>) | DevOps fundamentals, SDLC, virtual machines, and the DevOps engineer toolkit |
 | 🐳 [Docker](<Docker/README.md>) | Docker fundamentals, Dockerfile authoring, and Docker Compose |
 | 🌐 [GCP](<GCP/>) | GCP overview, getting started, and compute services |
